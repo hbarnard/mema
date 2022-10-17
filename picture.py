@@ -20,7 +20,7 @@ database = Database("sqlite:///var/spool/mema/db/memories.db")
 camera = PiCamera()
 camera.resolution = (1024, 768)
 
-# can't have this at the moment, no screen
+# can't have this a the moment, no screen
 # camera.start_preview()
 # Camera warm-up time
 dots[0] = (255,0,0)  # red
