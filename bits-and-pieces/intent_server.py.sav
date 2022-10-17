@@ -1,0 +1,73 @@
+from fastapi import FastAPI, Request
+import sys
+import subprocess
+import datetime
+
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
+
+from databases import Database
+
+database = Database("sqlite:///var/spool/mema/db/memories.db")
+
+app = FastAPI(debug=True)
+
+@app.post("/")
+async def getInformation(info : Request):
+    req_info = await info.json()
+    text = await run_picture_command(database)
+    print(req_info)
+    print(text)
+    return {
+        "status" : "SUCCESS",
+        "data" : req_info
+    }
+
+
+# ok this needs optimising, doesn't it?
+    
+async def run_picture_command():
+    result = subprocess.run(["/home/pi/projects/mema/picture.py"], check=True, capture_output=True, text=True).stdout
+    (text, file_path) = result.split('|')
+    query = "INSERT INTO memories(description, text, file_path, unix_time, public) VALUES (:description, :text, :file_path, :unix_time, :public)"
+    unix_time = int(datetime.datetime.now().timestamp())
+    values = ("description", text,  "text", text, "file_path", file_path, "unix_time", unix_time, "public", 0)
+    await database.execute(query=query, values=values)
+    return text
+    
+async def run_record_command():
+    result = subprocess.run(["/home/pi/projects/mema/record.py"], check=True, capture_output=True, text=True).stdout
+    (text, file_path) = result.split('|')
+    query = "INSERT INTO memories(description, text, file_path, unix_time, public) VALUES (:description, :text, :file_path, :unix_time, :public)"
+    unix_time = int(datetime.datetime.now().timestamp())
+    values = ("description", text,  "text", text, "file_path", file_path, "unix_time", unix_time, "public", 0)
+    await database.execute(query=query, values=values)
+    return text  
+    
+async def run_associate_command():
+    print("running classifier")
+    s2_out = subprocess.check_output([sys.executable, "/home/pi/projects/mema/associate.py"])
+    return s2_out    
+    
+    
+
+@app.on_event("startup")
+async def database_connect():
+    await database.connect()
+
+
+@app.on_event("shutdown")
+async def database_disconnect():
+    await database.disconnect()
+
+
+@app.post("/test")
+async def fetch_data(id: int):
+    query = "SELECT * FROM memories WHERE ID={}".format(str(id))
+    results = await database.fetch_all(query=query)
+    return  results
+    
+    
+    
+    
+    

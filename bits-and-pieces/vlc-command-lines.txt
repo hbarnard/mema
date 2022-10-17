@@ -1,0 +1,29 @@
+vlc dshow:// :dshow-vdev="USB2.0 Camera" --sout file/avi:test.avi --run-time=5
+
+vlc -I dummy -vvv input_stream --sout "#transcode{vcodec=none,acodec=vorb,ab=128,channels=2,samplerate=44100}:file{dst=foobar.ogg}"
+
+
+this may work:
+cvlc v4l2:///dev/video0:width=640:height=480 :input-slave=alsa://hw:0,0 --sout="#transcode{vcodec=theo,vb=2000,fps=20,scale=1.0,acodec=vorb,ab=90,channels=1,samplerate=44100}:duplicate{dst=display,dst=standard{access=file,mux=ogg,dst=output.ogg}}" 
+
+works, no live video:
+vlc v4l2:// :input-slave=alsa:// :v4l-vdev="/dev/video0" :v4l-norm=3 :v4l-frequency=-1 :v4l-caching=300 :v4l-chroma="" :v4l-fps=-1.000000 :v4l-samplerate=44100 :v4l-channel=0 :v4l-tuner=-1 :v4l-audio=-1 :v4l-stereo :v4l-width=480 :v4l-height=360 :v4l-brightness=-1 :v4l-colour=-1 :v4l-hue=-1 :v4l-contrast=-1 :no-v4l-mjpeg :v4l-decimation=1 :v4l-quality=100 --sout="#transcode{vcodec=theo,vb=2000,fps=12,scale=0.67,acodec=vorb,ab=90,channels=1,samplerate=44100}:standard{access=file,mux=ogg,dst=output.ogg}"
+could do with cvlc
+
+
+cvlc v4l2:///dev/video0:width=640:height=480 :input-slave=alsa://hw:1,1 --sout="#transcode{vcodec=theo,vb=2000,fps=20,scale=1.0,acodec=vorb,ab=90,channels=1,samplerate=44100}:duplicate{dst=display,dst=standard{access=file,mux=ogg,dst=output.ogg}}" 
+
+
+works with display, but no file, duplicate vs. standard
+cvlc v4l2:// :input-slave=alsa:// :v4l-vdev="/dev/video0" :v4l-norm=3 :v4l-frequency=-1 :v4l-caching=300 :v4l-chroma="" \
+:v4l-fps=-1.000000 :v4l-samplerate=44100 :v4l-channel=0 :v4l-tuner=-1 :v4l-audio=-1 :v4l-stereo :v4l-width=480 \
+:v4l-height=360 :v4l-brightness=-1 :v4l-colour=-1 :v4l-hue=-1 :v4l-contrast=-1 :no-v4l-mjpeg :v4l-decimation=1 \
+:v4l-quality=100 \
+--sout="#transcode{vcodec=theo,vb=2000,fps=12,scale=0.67,acodec=vorb,ab=90,channels=1,samplerate=44100}:duplicate{access=file,mux=ogg,dst=display, dst=output.ogg}"
+
+
+cvlc v4l2:// :input-slave=alsa:// :v4l-vdev="/dev/video0" :v4l-norm=3 :v4l-frequency=-1 :v4l-caching=300 :v4l-chroma="" \
+:v4l-fps=-1.000000 :v4l-samplerate=44100 :v4l-channel=0 :v4l-tuner=-1 :v4l-audio=-1 :v4l-stereo :v4l-width=480 \
+:v4l-height=360 :v4l-brightness=-1 :v4l-colour=-1 :v4l-hue=-1 :v4l-contrast=-1 :no-v4l-mjpeg :v4l-decimation=1 \
+:v4l-quality=100 \
+--sout="#transcode{vcodec=theo,vb=2000,fps=12,scale=0.67,acodec=vorb,ab=90,channels=1,samplerate=44100}:duplicate{dst=display,dst=standard{access=file,mux=ogg,dst=output.ogg}}"

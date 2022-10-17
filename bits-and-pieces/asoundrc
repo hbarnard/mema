@@ -1,0 +1,34 @@
+pcm.!default {
+  type asym
+  playback.pcm {
+    type plug
+    slave.pcm "output"
+  }
+  capture.pcm {
+    type plug
+    slave.pcm "input"
+  }
+}
+
+pcm.output {
+  type hw
+  card 2
+}
+
+pcm.dsnooped {
+    ipc_key 456479
+    type dsnoop
+    slave {
+        pcm "hw:1,0" 
+        channels 2 
+    }
+}
+
+
+
+
+
+ctl.!default {
+  type hw
+  card 2
+}
