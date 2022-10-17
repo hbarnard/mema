@@ -45,5 +45,5 @@ curl -s -X POST \
   -H 'Content-Type: application/json' \
   https://api.replicate.com/v1/predictions
 
-export REPLICATE_API_TOKEN=ad79292f164f7d5a0f91ac4e66a7de7dde18d8e8
+export REPLICATE_API_TOKEN=
 '''
