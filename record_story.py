@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import time
+from time import sleep
 import board
 import subprocess
 import requests
@@ -16,7 +16,7 @@ from digitalio import DigitalInOut, Direction, Pull
 import adafruit_dotstar
 DOTSTAR_DATA = board.D5
 DOTSTAR_CLOCK = board.D6
-
+dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
 
 '''
 def wheel(pos):
@@ -39,7 +39,7 @@ def counter(name):
     count = 60
     while count > 0:
         #dots.deinit()
-        time.sleep(10)
+        sleep(10)
         print(count)
         count -= count
         if count <= 20:
@@ -50,16 +50,29 @@ def counter(name):
     return
 '''
 
+'''
+Maybe later?
 
 button = DigitalInOut(board.D17)
 button.direction = Direction.INPUT
 button.pull = Pull.UP
+'''
+# spoken prompts without going back into node red
 
-dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
+def curl_speak(phrase):
 
-#subprocess.run(["docker stop 9a16d851c7c8", "", "/dev/null"], check=True, capture_output=True, text=True).stdout
+    cl = '''curl -s --header "Content-Type: text/utf-8"   --request POST  --data '{speech}'   http://localhost:12101/api/text-to-speech'''.format(speech = phrase)
+    cl_array = cl.split()
+    #print(cl_array)
+    subprocess.run(cl_array, check=True, capture_output=True).stdout
+    return
+
+phrase = "starting to record in a second or two".replace(' ','_')
+curl_speak(phrase)
+sleep(1)
+
 try:
-    subprocess.run(["docker", "stop", "e63d3b9351a2"], check=True, capture_output=True, text=True).stdout
+    subprocess.run(["docker", "stop", "rhasspy"], check=True, capture_output=True, text=True).stdout
 except subprocess.CalledProcessError as e:
     raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
@@ -67,12 +80,11 @@ except subprocess.CalledProcessError as e:
 unix_time = int(datetime.datetime.now().timestamp())
 file_path = "/var/spool/mema/rec/" + str(unix_time) + ".wav" 
 
-time.sleep(1)
+sleep(1)
 
 dots[0] = (255,0,0)  # green
 
 try:
-    #print('here')
     subprocess.run(["arecord", "-f", "cd", "-c", "2", "-D", "plug:dsnooped",  "--duration", "60" , file_path], check=True, capture_output=True, text=True).stdout
 except subprocess.CalledProcessError as e:
     raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
@@ -80,9 +92,13 @@ except subprocess.CalledProcessError as e:
 dots[0] = (0,0,255)  # red
 
 try:
-    subprocess.run(["docker", "start", "e63d3b9351a2"], check=True, capture_output=True, text=True).stdout
+    subprocess.run(["docker", "start", "rhasspy"], check=True, capture_output=True, text=True).stdout
 except subprocess.CalledProcessError as e:
     raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+
+sleep(5)  # give rhasspy time to reload!
+phrase = "finished recording, starting to transcribe".replace(' ','_')
+curl_speak(phrase)
 
 
 # select speech to text model
@@ -95,6 +111,9 @@ dots[0] = (0,255,0)  # blue
 
 # speech to text on remote server
 result = model.predict(audio=audio_file)
+
+phrase = "finished transcription".replace(' ','_')
+curl_speak(phrase)
 
 # done, feedback 
 dots[0] = (255,0,0)  # green

@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 import sys
 import subprocess
 import datetime
+import requests
 
 from fastapi import UploadFile, File, Form
 from fastapi import APIRouter, Query, HTTPException
@@ -13,6 +14,13 @@ from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 from pathlib import Path
 
+def curl_speak(phrase):
+
+    cl = '''curl -s --header "Content-Type: text/utf-8"   --request POST  --data '{speech}'   http://localhost:12101/api/text-to-speech'''.format(speech = phrase)
+    cl_array = cl.split()
+    #print(cl_array)
+    subprocess.run(cl_array, check=True, capture_output=True).stdout
+    return
 
 '''
 Improvements, parameter file for file paths, program paths
@@ -30,6 +38,16 @@ TEMPLATES = Jinja2Templates(directory=str(BASE_PATH / "templates"))
 
 api_router = APIRouter()
 
+
+# spoken prompts without going back into node red
+# move this to a library later on
+
+
+
+
+
+
+# actually we can get rid of this, just split the URLs out
 
 @app.post("/")
 async def getInformation(info : Request):
@@ -99,19 +117,15 @@ def fetch_all(request: Request):
     )
     #return fields
     
-'''    
-@api_router.get("/", status_code=200)
-def root(request: Request) -> dict:  # 2
-    """
-    Root GET
-    """
     
-    # 3
-    return TEMPLATES.TemplateResponse(
-        "index.html",
-        {"request": request, "recipes": RECIPES},
-    )
-'''    
-    
+# this is just to test the curl method, used to 'avoid' using node-red
+# for in script prompts
+
+@app.get("/speak")
+def speak():
+    phrase = "hello you silly billies".replace(' ','_')
+    curl_speak(phrase)
+ 
+        
     
     
