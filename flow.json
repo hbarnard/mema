@@ -1,13 +1,5 @@
 [
     {
-        "id": "de7f1a7717580152",
-        "type": "tab",
-        "label": "Flow 1",
-        "disabled": false,
-        "info": "",
-        "env": []
-    },
-    {
         "id": "70d90eed.9fc7e8",
         "type": "tab",
         "label": "Rhasspy Intent",
@@ -46,7 +38,7 @@
     {
         "id": "5f61a7787e22a16e",
         "type": "tab",
-        "label": "Flow 3",
+        "label": "Python Integration Test",
         "disabled": false,
         "info": "",
         "env": []
@@ -370,8 +362,8 @@
         "wires": [
             [
                 "1cf9bec4.4449d1",
-                "20d1e591be301077",
-                "619c2bbf77ceb7ab"
+                "619c2bbf77ceb7ab",
+                "20d1e591be301077"
             ]
         ]
     },
@@ -413,28 +405,6 @@
         "wires": []
     },
     {
-        "id": "20d1e591be301077",
-        "type": "http request",
-        "z": "2f1e41c5.19c21e",
-        "name": "",
-        "method": "POST",
-        "ret": "obj",
-        "paytoqs": "ignore",
-        "url": "http://localhost:8000",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 730,
-        "y": 420,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "3f214a1b4b805b39",
         "type": "inject",
         "z": "2f1e41c5.19c21e",
@@ -461,6 +431,111 @@
             [
                 "1cf9bec4.4449d1"
             ]
+        ]
+    },
+    {
+        "id": "20d1e591be301077",
+        "type": "http request",
+        "z": "2f1e41c5.19c21e",
+        "name": "",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://localhost:8000",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 770,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5fe2221238f37655",
+        "type": "pythonshell in",
+        "z": "5f61a7787e22a16e",
+        "name": "Talk Test",
+        "pyfile": "/home/pi/projects/mema/talk_test.py",
+        "virtualenv": "",
+        "continuous": true,
+        "stdInData": false,
+        "x": 440,
+        "y": 180,
+        "wires": [
+            [
+                "0b7a081e219c9d84",
+                "862fd9fc662de8b6"
+            ]
+        ]
+    },
+    {
+        "id": "5a15b054a4716b82",
+        "type": "inject",
+        "z": "5f61a7787e22a16e",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "5",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 250,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0b7a081e219c9d84",
+        "type": "debug",
+        "z": "5f61a7787e22a16e",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "862fd9fc662de8b6",
+        "type": "http request",
+        "z": "5f61a7787e22a16e",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://localhost:12101/api/text-to-speech",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 610,
+        "y": 260,
+        "wires": [
+            []
         ]
     }
 ]
