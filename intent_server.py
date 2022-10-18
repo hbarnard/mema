@@ -115,7 +115,18 @@ def fetch_all(request: Request):
         "list.html",
         {"request": request, "results" :results}
     )
-    #return fields
+
+@app.get("/memory/{id}/speak")
+def fetch_data(id: int):
+    cur = con.cursor()
+    result = cur.execute("SELECT * FROM memories WHERE memory_id={}".format(str(id)))
+    fields = result.fetchone()
+    #print(fields)
+    phrase = fields[1].replace(' ','_')
+    curl_speak(phrase)
+    return fields
+
+
     
     
 # this is just to test the curl method, used to 'avoid' using node-red
