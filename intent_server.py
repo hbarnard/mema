@@ -53,16 +53,24 @@ api_router = APIRouter()
 async def getInformation(info : Request):
     
     req_info = await info.json()
+    intent = req_info['intent']['intentName']
     
-    # bit stupid since this is json, also switch maybe?
-    if "story" in req_info:
-        text = run_record_command()
-        print("story found")
-    elif "photo" in req_info:
-        text = run_picture_command()
-    elif "associate" in req_info:
-        print("aasociate found")
-    print(text)
+    if intent == "TakePhoto":
+        print("take photo found")
+        #run_picture_command()
+    elif intent == "GetStory":
+        #fetch_data(id: int)
+        print("get story found")
+    elif intent == "TellStory":
+        print("tell story found")    
+    elif intent == "Associate":
+        print("associate photo and story found")
+    elif intent == "StoreStory":
+        run_record_command()
+        print("record story found")
+    else:
+        print("nothing found")
+    print(req_info)
     return {
         "status" : "SUCCESS",
         "data" : req_info
@@ -127,16 +135,6 @@ def fetch_data(id: int):
     return fields
 
 
-    
-    
-# this is just to test the curl method, used to 'avoid' using node-red
-# for in script prompts
-
-@app.get("/speak")
-def speak():
-    phrase = "hello you silly billies".replace(' ','_')
-    curl_speak(phrase)
- 
         
     
     
