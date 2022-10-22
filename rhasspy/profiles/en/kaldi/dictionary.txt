@@ -1,0 +1,54 @@
+thirteen T '3 t 'i n
+seventeen s 'E v V n t 'i n
+story s t 'O r i
+thirty T '3 d i
+one w 'V n
+fifty f 'I f t i
+it 'I t
+ten t 'E n
+with w 'I D
+exit 'E g z I t
+<sil> SIL
+temperature t 'E m p r V tS 3
+cold k 'o U l d
+seven s 'E v V n
+sixteen s I k s t 'i n
+time t 'aI m
+eight 'e I t
+put p 'U t
+is 'I z
+the D V
+what w 'V t
+forty f 'O r t i
+nine n 'aI n
+pie p 'aI
+me m 'i
+photograph f 'o U t V g r { f
+three T r 'i
+a V
+how h 'aU
+twelve t w 'E l v
+eleven I l 'E v V n
+whats w V ts
+fifteen f I f t 'i n
+fourteen f 'O r t 'i n
+enter 'E n t 3
+<unk> SPN
+four f 'O r
+please p l 'i z
+photo f 'o U t o U
+twenty t w 'E n t i
+tell t 'E l
+two t 'u
+five f 'aI v
+hot h 'A t
+record r V k 'O r d
+eighteen e I t 'i n
+nineteen n 'aI n t 'i n
+give g 'I v
+get g 'E t
+continuous k V n t 'I n j u V s
+mode m 'o U d
+six s 'I k s
+some s 'V m
+sixty s 'I k s t i

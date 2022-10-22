@@ -1,0 +1,55 @@
+<eps> <eps> SIL
+<sil> <sil> SIL_S
+<unk> <unk> SPN_S
+a a V_S
+cold cold k_B 'o_I U_I l_I d_E
+continuous continuous k_B V_I n_I t_I 'I_I n_I j_I u_I V_I s_E
+eight eight 'e_B I_I t_E
+eighteen eighteen e_B I_I t_I 'i_I n_E
+eleven eleven I_B l_I 'E_I v_I V_I n_E
+enter enter 'E_B n_I t_I 3_E
+exit exit 'E_B g_I z_I I_I t_E
+fifteen fifteen f_B I_I f_I t_I 'i_I n_E
+fifty fifty f_B 'I_I f_I t_I i_E
+five five f_B 'aI_I v_E
+forty forty f_B 'O_I r_I t_I i_E
+four four f_B 'O_I r_E
+fourteen fourteen f_B 'O_I r_I t_I 'i_I n_E
+get get g_B 'E_I t_E
+give give g_B 'I_I v_E
+hot hot h_B 'A_I t_E
+how how h_B 'aU_E
+is is 'I_B z_E
+it it 'I_B t_E
+me me m_B 'i_E
+mode mode m_B 'o_I U_I d_E
+nine nine n_B 'aI_I n_E
+nineteen nineteen n_B 'aI_I n_I t_I 'i_I n_E
+one one w_B 'V_I n_E
+photo photo f_B 'o_I U_I t_I o_I U_E
+photograph photograph f_B 'o_I U_I t_I V_I g_I r_I {_I f_E
+pie pie p_B 'aI_E
+please please p_B l_I 'i_I z_E
+put put p_B 'U_I t_E
+record record r_B V_I k_I 'O_I r_I d_E
+seven seven s_B 'E_I v_I V_I n_E
+seventeen seventeen s_B 'E_I v_I V_I n_I t_I 'i_I n_E
+six six s_B 'I_I k_I s_E
+sixteen sixteen s_B I_I k_I s_I t_I 'i_I n_E
+sixty sixty s_B 'I_I k_I s_I t_I i_E
+some some s_B 'V_I m_E
+story story s_B t_I 'O_I r_I i_E
+tell tell t_B 'E_I l_E
+temperature temperature t_B 'E_I m_I p_I r_I V_I tS_I 3_E
+ten ten t_B 'E_I n_E
+the the D_B V_E
+thirteen thirteen T_B '3_I t_I 'i_I n_E
+thirty thirty T_B '3_I d_I i_E
+three three T_B r_I 'i_E
+time time t_B 'aI_I m_E
+twelve twelve t_B w_I 'E_I l_I v_E
+twenty twenty t_B w_I 'E_I n_I t_I i_E
+two two t_B 'u_E
+what what w_B 'V_I t_E
+whats whats w_B V_I ts_E
+with with w_B 'I_I D_E

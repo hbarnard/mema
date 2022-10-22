@@ -1,0 +1,54 @@
+thirteen 1.0	T '3 t 'i n
+seventeen 1.0	s 'E v V n t 'i n
+story 1.0	s t 'O r i
+thirty 1.0	T '3 d i
+one 1.0	w 'V n
+fifty 1.0	f 'I f t i
+it 1.0	'I t
+ten 1.0	t 'E n
+with 1.0	w 'I D
+exit 1.0	'E g z I t
+<sil> 1.0	SIL
+temperature 1.0	t 'E m p r V tS 3
+cold 1.0	k 'o U l d
+seven 1.0	s 'E v V n
+sixteen 1.0	s I k s t 'i n
+time 1.0	t 'aI m
+eight 1.0	'e I t
+put 1.0	p 'U t
+is 1.0	'I z
+the 1.0	D V
+what 1.0	w 'V t
+forty 1.0	f 'O r t i
+nine 1.0	n 'aI n
+pie 1.0	p 'aI
+me 1.0	m 'i
+photograph 1.0	f 'o U t V g r { f
+three 1.0	T r 'i
+a 1.0	V
+how 1.0	h 'aU
+twelve 1.0	t w 'E l v
+eleven 1.0	I l 'E v V n
+whats 1.0	w V ts
+fifteen 1.0	f I f t 'i n
+fourteen 1.0	f 'O r t 'i n
+enter 1.0	'E n t 3
+<unk> 1.0	SPN
+four 1.0	f 'O r
+please 1.0	p l 'i z
+photo 1.0	f 'o U t o U
+twenty 1.0	t w 'E n t i
+tell 1.0	t 'E l
+two 1.0	t 'u
+five 1.0	f 'aI v
+hot 1.0	h 'A t
+record 1.0	r V k 'O r d
+eighteen 1.0	e I t 'i n
+nineteen 1.0	n 'aI n t 'i n
+give 1.0	g 'I v
+get 1.0	g 'E t
+continuous 1.0	k V n t 'I n j u V s
+mode 1.0	m 'o U d
+six 1.0	s 'I k s
+some 1.0	s 'V m
+sixty 1.0	s 'I k s t i

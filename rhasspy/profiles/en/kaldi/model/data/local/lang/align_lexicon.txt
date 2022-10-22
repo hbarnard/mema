@@ -1,0 +1,55 @@
+thirteen T_B '3_I t_I 'i_I n_E
+seventeen s_B 'E_I v_I V_I n_I t_I 'i_I n_E
+story s_B t_I 'O_I r_I i_E
+thirty T_B '3_I d_I i_E
+one w_B 'V_I n_E
+fifty f_B 'I_I f_I t_I i_E
+it 'I_B t_E
+ten t_B 'E_I n_E
+with w_B 'I_I D_E
+exit 'E_B g_I z_I I_I t_E
+<sil> SIL_S
+temperature t_B 'E_I m_I p_I r_I V_I tS_I 3_E
+cold k_B 'o_I U_I l_I d_E
+seven s_B 'E_I v_I V_I n_E
+sixteen s_B I_I k_I s_I t_I 'i_I n_E
+time t_B 'aI_I m_E
+eight 'e_B I_I t_E
+put p_B 'U_I t_E
+is 'I_B z_E
+the D_B V_E
+what w_B 'V_I t_E
+forty f_B 'O_I r_I t_I i_E
+nine n_B 'aI_I n_E
+pie p_B 'aI_E
+me m_B 'i_E
+photograph f_B 'o_I U_I t_I V_I g_I r_I {_I f_E
+three T_B r_I 'i_E
+a V_S
+how h_B 'aU_E
+twelve t_B w_I 'E_I l_I v_E
+eleven I_B l_I 'E_I v_I V_I n_E
+whats w_B V_I ts_E
+fifteen f_B I_I f_I t_I 'i_I n_E
+fourteen f_B 'O_I r_I t_I 'i_I n_E
+enter 'E_B n_I t_I 3_E
+<unk> SPN_S
+four f_B 'O_I r_E
+please p_B l_I 'i_I z_E
+photo f_B 'o_I U_I t_I o_I U_E
+twenty t_B w_I 'E_I n_I t_I i_E
+tell t_B 'E_I l_E
+two t_B 'u_E
+five f_B 'aI_I v_E
+hot h_B 'A_I t_E
+record r_B V_I k_I 'O_I r_I d_E
+eighteen e_B I_I t_I 'i_I n_E
+nineteen n_B 'aI_I n_I t_I 'i_I n_E
+give g_B 'I_I v_E
+get g_B 'E_I t_E
+continuous k_B V_I n_I t_I 'I_I n_I j_I u_I V_I s_E
+mode m_B 'o_I U_I d_E
+six s_B 'I_I k_I s_E
+some s_B 'V_I m_E
+sixty s_B 'I_I k_I s_I t_I i_E
+<eps> SIL

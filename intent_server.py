@@ -6,13 +6,19 @@ import requests
 
 from fastapi import UploadFile, File, Form
 from fastapi import APIRouter, Query, HTTPException
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
+import re
+
 import sqlite3
 from pathlib import Path
+
+
+# spoken prompts without going back into node-red
 
 def curl_speak(phrase):
 
@@ -39,21 +45,14 @@ TEMPLATES = Jinja2Templates(directory=str(BASE_PATH / "templates"))
 api_router = APIRouter()
 
 
-# spoken prompts without going back into node red
-# move this to a library later on
-
-
-
-
-
-
-# actually we can get rid of this, just split the URLs out
 
 @app.post("/")
 async def getInformation(info : Request):
     
     req_info = await info.json()
     intent = req_info['intent']['intentName']
+    raw_speech = req_info['input']
+    print(req_info)
     
     if intent == "TakePhoto":
         print("take photo found")
@@ -61,16 +60,21 @@ async def getInformation(info : Request):
     elif intent == "GetStory":
         #fetch_data(id: int)
         print("get story found")
+        story_number = re.findall(r'\b\d+\b', raw_speech)
+        print(story_number[0])
+        url = "http://localhost:8000/memory/" + str(story_number[0]) + "/speak"
+        print('url is ' + url)
+        return RedirectResponse(url)
     elif intent == "TellStory":
         print("tell story found")    
     elif intent == "Associate":
         print("associate photo and story found")
     elif intent == "StoreStory":
-        run_record_command()
+        #run_record_command()
         print("record story found")
     else:
         print("nothing found")
-    print(req_info)
+    
     return {
         "status" : "SUCCESS",
         "data" : req_info
@@ -106,7 +110,7 @@ def run_associate_command():
     s2_out = subprocess.check_output([sys.executable, "/home/pi/projects/mema/associate.py"])
     return s2_out    
     
-
+# screen only
 @app.get("/memory/{id}")
 def fetch_data(id: int):
     cur = con.cursor()
@@ -124,14 +128,20 @@ def fetch_all(request: Request):
         {"request": request, "results" :results}
     )
 
-@app.get("/memory/{id}/speak")
+
+# ok ugly should be get, but problem with FastApi see: 
+# https://stackoverflow.com/questions/62119138/how-to-do-a-post-redirect-get-prg-in-fastapi
+@app.post("/memory/{id}/speak")
 def fetch_data(id: int):
     cur = con.cursor()
-    result = cur.execute("SELECT * FROM memories WHERE memory_id={}".format(str(id)))
+    result = cur.execute("SELECT text FROM memories WHERE memory_id={}".format(str(id)))
     fields = result.fetchone()
-    #print(fields)
-    phrase = fields[1].replace(' ','_')
-    curl_speak(phrase)
+    if fields is not None:
+        print(fields)
+        phrase = fields[0].replace(' ','_')
+        curl_speak(phrase)
+    else:
+        curl_speak("I_cannot_find_that_sorry")
     return fields
 
 

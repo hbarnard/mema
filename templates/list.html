@@ -1,14 +1,38 @@
+<head>
+<style>
+table, th, td {
+  border: 1px solid;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+</style>
+
+</head>
+
 <h2>Memory Lister: Testing Only</h2>
 
-<table border>
+<table width="70%">
+<th>
+    
+ 
+        <td>Heading</td>
+        <td>Text</td>
+        <td>File Path</td>
+        <td>Public</td>
+        <td>Type</td>
 
+</th>
 {% for result in results %}
     <tr>
         <td>{{ result[0] }}</td>
         <td>{{ result[1] }}</td>
         <td>{{ result[2] }}</td>
         <td>{{ result[3] }}</td>
-        <td>{{ result[4] }}</td>
+        <td>{{ result[5] }}</td>
+        <td>{{ result[7] }}</td>
     </tr>
 {% endfor %}
 
