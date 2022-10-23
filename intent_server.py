@@ -17,6 +17,8 @@ import re
 import sqlite3
 from pathlib import Path
 
+import configparser
+
 
 # spoken prompts without going back into node-red
 
@@ -28,23 +30,37 @@ def curl_speak(phrase):
     subprocess.run(cl_array, check=True, capture_output=True).stdout
     return
 
-'''
-Improvements, parameter file for file paths, program paths
-some logging, some listing for database contents
-'''
 
-con = sqlite3.connect("/var/spool/mema/db/memories.db", check_same_thread=False)
+
+config = configparser.ConfigParser()
+config.read('etc/mema.ini')
+
+
+con = sqlite3.connect(config['main']['db'], check_same_thread=False)
 
 app = FastAPI(debug=True)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
 BASE_PATH = Path(__file__).resolve().parent
 TEMPLATES = Jinja2Templates(directory=str(BASE_PATH / "templates"))
 
 api_router = APIRouter()
 
 
+# integrate and put into config file.
+'''
+log_config = uvicorn.config.LOGGING_CONFIG
+log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
+log_config["formatters"]["default"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
+uvicorn.run(app, log_config=log_config)
+uvicorn.run(app, host="0.0.0.0", port=8000, log_config=log_config)
+'''
+
+
+
+
+
+# Python 3.10 has 'match' which would tidy this up a little.
 
 @app.post("/")
 async def getInformation(info : Request):
@@ -58,12 +74,10 @@ async def getInformation(info : Request):
         print("take photo found")
         #run_picture_command()
     elif intent == "GetStory":
-        #fetch_data(id: int)
         print("get story found")
         story_number = re.findall(r'\b\d+\b', raw_speech)
-        print(story_number[0])
-        url = "http://localhost:8000/memory/" + str(story_number[0]) + "/speak"
-        print('url is ' + url)
+        #print(story_number[0])
+        url = config['main']['intent_server'] + "/memory/" + str(story_number[0]) + "/speak"
         return RedirectResponse(url)
     elif intent == "TellStory":
         print("tell story found")    
@@ -81,11 +95,10 @@ async def getInformation(info : Request):
     }
 
 
-# ok this needs optimising, doesn't it?
     
 def run_picture_command():
     cur = con.cursor()
-    result = subprocess.run(["/home/pi/projects/mema/picture.py"], check=True, capture_output=True, text=True).stdout
+    result = subprocess.run([config['main']['picture_program']], check=True, capture_output=True, text=True).stdout
     (text, file_path) = result.split('|')
 
     unix_time = int(datetime.datetime.now().timestamp())
@@ -94,7 +107,7 @@ def run_picture_command():
     return text
     
 def run_record_command():
-    result = subprocess.run(["/home/pi/projects/mema/record_story.py"], check=True, capture_output=True, text=True).stdout
+    result = subprocess.run([config['main']['story_program']], check=True, capture_output=True, text=True).stdout
     (text, file_path) = result.split('|')
     
     unix_time = int(datetime.datetime.now().timestamp())
@@ -141,7 +154,7 @@ def fetch_data(id: int):
         phrase = fields[0].replace(' ','_')
         curl_speak(phrase)
     else:
-        curl_speak("I_cannot_find_that_sorry")
+        curl_speak(config['en_prompts']['sorry'])
     return fields
 
 
