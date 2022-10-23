@@ -56,11 +56,8 @@ uvicorn.run(app, log_config=log_config)
 uvicorn.run(app, host="0.0.0.0", port=8000, log_config=log_config)
 '''
 
-
-
-
-
 # Python 3.10 has 'match' which would tidy this up a little.
+# needs tidying anyway
 
 @app.post("/")
 async def getInformation(info : Request):
@@ -68,8 +65,14 @@ async def getInformation(info : Request):
     req_info = await info.json()
     intent = req_info['intent']['intentName']
     raw_speech = req_info['input']
-    print(req_info)
+    #print(req_info)
+    #print(req_info['asrConfidence'])
     
+    if not len(intent) or (req_info['asrConfidence'] < float(config['main']['confidence'])) :
+        curl_speak(config['en_prompts']['not_understood'])
+        return {
+            "status" : "FAIL"
+        }
     if intent == "TakePhoto":
         print("take photo found")
         #run_picture_command()
@@ -88,13 +91,11 @@ async def getInformation(info : Request):
         print("record story found")
     else:
         print("nothing found")
-    
+        
     return {
         "status" : "SUCCESS",
         "data" : req_info
     }
-
-
     
 def run_picture_command():
     cur = con.cursor()
@@ -150,8 +151,10 @@ def fetch_data(id: int):
     result = cur.execute("SELECT text FROM memories WHERE memory_id={}".format(str(id)))
     fields = result.fetchone()
     if fields is not None:
-        print(fields)
-        phrase = fields[0].replace(' ','_')
+        #print(fields)
+        lines = fields[0].splitlines()
+        text = ' '.join(lines)
+        phrase = text.replace(' ','_')
         curl_speak(phrase)
     else:
         curl_speak(config['en_prompts']['sorry'])
