@@ -22,8 +22,23 @@ cvlc v4l2:// :input-slave=alsa:// :v4l-vdev="/dev/video0" :v4l-norm=3 :v4l-frequ
 --sout="#transcode{vcodec=theo,vb=2000,fps=12,scale=0.67,acodec=vorb,ab=90,channels=1,samplerate=44100}:duplicate{access=file,mux=ogg,dst=display, dst=output.ogg}"
 
 
+works on desktop, anyway
 cvlc v4l2:// :input-slave=alsa:// :v4l-vdev="/dev/video0" :v4l-norm=3 :v4l-frequency=-1 :v4l-caching=300 :v4l-chroma="" \
 :v4l-fps=-1.000000 :v4l-samplerate=44100 :v4l-channel=0 :v4l-tuner=-1 :v4l-audio=-1 :v4l-stereo :v4l-width=480 \
 :v4l-height=360 :v4l-brightness=-1 :v4l-colour=-1 :v4l-hue=-1 :v4l-contrast=-1 :no-v4l-mjpeg :v4l-decimation=1 \
 :v4l-quality=100 \
 --sout="#transcode{vcodec=theo,vb=2000,fps=12,scale=0.67,acodec=vorb,ab=90,channels=1,samplerate=44100}:duplicate{dst=display,dst=standard{access=file,mux=ogg,dst=output.ogg}}"
+
+works on desktop gain up better sound
+cvlc v4l2:// :input-slave=alsa:// :v4l-vdev="/dev/video0"1:v4l-norm=3 :v4l-frequency=-1 :v4l-caching=300 :v4l-chroma="" :v4l-fps=-1.000000 :v4l-samplerate=44100 :v4l-channel=0 :v4l-tuner=-1 :v4l-audio=2 :v4l-stereo :v4l-width=480 :v4l-height=360 :v4l-brightness=-1 :v4l-colour=-1 :v4l-hue=-1 :v4l-contrast=-1 :no-v4l-mjpeg :gain=8 :v4l-decimation=1 :v4l-quality=100 --sout="#transcode{vcodec=theo,vb=2000,fps=12,scale=0.67,acodec=vorb,ab=90,channels=1,samplerate=44100}:duplicate{dst=display,dst=standard{access=file,mux=ogg,dst=output.ogg}}"
+
+
+rapspivid or libcamera? stream to 8160, no audio, works
+raspivid -o - -t 0 -hf -w 800 -h 400 -fps 24 |cvlc -vvv stream:///dev/stdin --sout '#standard{access=http,mux=ts,dst=:8160}' :demux=h264
+
+raspivid to mp4, no audio
+sudo raspivid -o -  -t 60000 -ex night -br 50  -w 1920 -h 1080 -rot 279 -fps 8 | sudo ffmpeg -r 8 -i - -y -vcodec copy /var/spool/mema/vid/test.mp4
+
+
+
+

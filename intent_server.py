@@ -89,9 +89,10 @@ async def getInformation(info : Request):
     elif intent == "StoreStory":
         #run_record_command()
         print("record story found")
+    elif intent == "RecordVideo":
+        run_video_command()        
     else:
-        print("nothing found")
-        
+        print("nothing found")        
     return {
         "status" : "SUCCESS",
         "data" : req_info
@@ -118,6 +119,33 @@ def run_record_command():
     cur.execute("INSERT INTO memories (description, text, file_path, unix_time, public, owner, type) values (?, ?,?, ?, ?, ?,? )", (description, text, file_path, unix_time, 0, 1, 'text'))
     con.commit()
     return text  
+    
+def run_video_command():
+    
+    unix_time = int(datetime.datetime.now().timestamp())    
+    
+    # make and add file path    
+    file_path = config['main']['media_directory'] + 'vid/' + str(unix_time) + '.mp4'     
+    video_command = config['main']['video_command'] + ' ' +  file_path
+    #video_command_array = video_command.split()
+    #x = ' '.join(video_command_array)
+    #print(x)
+    #return
+
+    try:
+        subprocess.run(video_command, shell=True, check=True, capture_output=True, text=True).stdout
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+        
+    #FIXME: how to deal with this, Google cloud?
+    description = 'unlabelled video'
+    text = 'unlabelled video'
+    
+    cur = con.cursor()
+    cur.execute("INSERT INTO memories (description, text, file_path, unix_time, public, owner, type) values (?, ?,?, ?, ?, ?,? )", (description, text, file_path, unix_time, 0, 1, 'video'))
+    con.commit()
+    return text      
+    
     
 def run_associate_command():
     print("running classifier")
