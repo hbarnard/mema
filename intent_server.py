@@ -1,14 +1,15 @@
 from fastapi import FastAPI, Request
 import sys
+import os
+
 import subprocess
 import datetime
 import requests
 
 from fastapi import UploadFile, File, Form
 from fastapi import APIRouter, Query, HTTPException
-from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -151,6 +152,11 @@ def run_associate_command():
     print("running classifier")
     s2_out = subprocess.check_output([sys.executable, "/home/pi/projects/mema/associate.py"])
     return s2_out    
+ 
+@app.get('/favicon.ico')
+async def favicon():
+   return FileResponse('./static/favicon.ico')
+ 
     
 # screen only
 @app.get("/memory/{id}")
@@ -165,6 +171,7 @@ def fetch_all(request: Request):
     cur = con.cursor()
     result = cur.execute("SELECT * FROM memories")
     results = result.fetchall()
+    print(results)
     return TEMPLATES.TemplateResponse(
         "list.html",
         {"request": request, "results" :results}

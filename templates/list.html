@@ -1,30 +1,32 @@
 <head>
 <style>
-table, th, td {
-  border: 1px solid;
+table, th, td, tr {
+  border: 1px ;
+  // color: red ;
 }
 
 tr:nth-child(even) {
-  background-color: #f2f2f2;
+  background-color: LightBlue;
 }
 
 </style>
-
+<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 </head>
 
 <h2>Memory Lister: Testing Only</h2>
 
 <table width="70%">
-<th>
+<tr>
     
  
+        <td>Rec No</td>
         <td>Heading</td>
         <td>Text</td>
         <td>File Path</td>
         <td>Public</td>
         <td>Type</td>
 
-</th>
+</tr>
 {% for result in results %}
     <tr>
         <td>{{ result[0] }}</td>
@@ -37,3 +39,6 @@ tr:nth-child(even) {
 {% endfor %}
 
 </table>
+
+<br/>
+* 0 in <b>public</b> means that the memory is private, this is the default
