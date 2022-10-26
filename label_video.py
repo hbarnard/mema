@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
+import os
+import sys
+
 from time import sleep
 import board
 import subprocess
 import requests
 import datetime
 from pathlib import Path
-import threading
 
 import replicate
 
@@ -45,8 +47,8 @@ config.read('etc/mema.ini')
 
 phrase = config['en_prompts']['start_record'].replace(' ','_')
 curl_speak(phrase)
-sleep(1)
 
+dots[2] = (0,0,255)  # red
 
 try:
     subprocess.run(["docker", "stop", "rhasspy"], check=True, capture_output=True, text=True).stdout
@@ -55,10 +57,10 @@ except subprocess.CalledProcessError as e:
 
 # make a file name from the current unix timestamp
 unix_time = int(datetime.datetime.now().timestamp())
-file_path = config['main']['media_directory'] + "rec/" + str(unix_time) + ".wav" 
+file_path = config['main']['media_directory'] + "tmp/" + str(unix_time) + ".wav" 
 
-sleep(1)
-dots[0] = (255,0,0)  # green
+sleep(10)
+dots[2] = (255,0,0)  # green
 
 try:
     record_command = config['main']['record_command'] + ' ' + file_path
@@ -68,18 +70,17 @@ try:
 except subprocess.CalledProcessError as e:
     raise RuntimeError("command '{}' return here with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
-dots[0] = (0,0,255)  # red
+dots[2] = (0,0,255)  # red
 
 try:
     subprocess.run(["docker", "start", "rhasspy"], check=True, capture_output=True, text=True).stdout
 except subprocess.CalledProcessError as e:
     raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
-sleep(5)  # give rhasspy time to reload!
+sleep(10)  # give rhasspy time to reload!
 
 phrase =  config['en_prompts']['end_record'].replace(' ','_')
 curl_speak(phrase)
-
 
 # select speech to text model
 model = replicate.models.get("openai/whisper")
@@ -87,18 +88,24 @@ model = replicate.models.get("openai/whisper")
 audio_file = Path(file_path)
 
 # give a little feedback
-dots[0] = (0,255,0)  # blue
+dots[2] = (0,255,0)  # blue
 
 # speech to text on remote server
+# signal transacription empty if something goes wrong
+result = {"transcription" : "empty"}
 result = model.predict(audio=audio_file)
 
 phrase = config['en_prompts']['end_transcription'].replace(' ','_')
 curl_speak(phrase)
 
 # done, feedback, stop blinking lights
-dots[0] = (255,0,0)  # green
+dots[2] = (255,0,0)  # green
 sleep(5)
 dots.deinit()
 
+# delete temporary file
+os.remove(file_path)
+
 # return result and file path to intent server
-print(result['transcription']  + "|" + file_path)
+# the format of reply is maintained although this doesn't keep a file
+print(result['transcription']  + "|" + 'no_path')

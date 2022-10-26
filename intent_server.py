@@ -57,6 +57,27 @@ uvicorn.run(app, log_config=log_config)
 uvicorn.run(app, host="0.0.0.0", port=8000, log_config=log_config)
 '''
 
+'''
+or start to use an url for each intent
+def handle_one():
+  do_stuff
+
+def handle_two():
+  do_stuff
+
+def handle_three():
+  do_stuff
+
+
+{'one': handle_one, 
+ 'two': handle_two, 
+ 'three': handle_three}[option]()
+'''
+
+
+
+
+
 # Python 3.10 has 'match' which would tidy this up a little.
 # needs tidying anyway
 
@@ -91,8 +112,12 @@ async def getInformation(info : Request):
         run_record_command()
         #print("record story found")
     elif intent == "RecordVideo":
-        print("record video found")
-        run_video_command()        
+        story_number = re.findall(r'\b\d+\b', raw_speech)
+        run_video_command()  
+    elif intent == "LabelVideo":
+        video_number = re.findall(r'\b\d+\b', raw_speech)
+        run_label_video_command(video_number)        
+        #print("label video found for " + str(video_number))
     else:
         print("nothing found")        
     return {
@@ -145,6 +170,28 @@ def run_video_command():
     con.commit()
     return text      
     
+def run_label_video_command(video_number):
+    cur = con.cursor()
+    result = cur.execute("SELECT * FROM memories WHERE memory_id=?",(video_number))
+    fields = result.fetchone()
+    if fields is not None:
+        if (fields[7] != 'video'):
+            curl_speak(config['en_prompts']['not_video'])
+            return
+        else:
+            result = subprocess.run([config['main']['label_program']],  check=True, capture_output=True, text=True).stdout
+            #print(result)
+            (text, file_path) = result.split('|')
+            if (text != 'empty'):
+                #print('video number is ' + video_number)
+                cur.execute("update memories set description = ? WHERE memory_id=?",(text, video_number[0]))
+            else:
+                curl_speak(config['en_prompts']['didnt_get'])
+    else:
+        curl_speak(config['en_prompts']['sorry'])
+    print(fields)
+    return
+
     
 def run_associate_command():
     print("running classifier")
