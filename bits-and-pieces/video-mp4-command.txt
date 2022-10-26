@@ -1,0 +1,1 @@
+sudo raspivid -o -  -t 60000 -ex night -br 50  -w 1920 -h 1080 -rot 279 -fps 8 | sudo ffmpeg  -nostats -loglevel 0   -r 8 -i - -y -vcodec copy /var/spool/mema/vid/1666622129.mp4

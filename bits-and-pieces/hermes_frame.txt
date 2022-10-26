@@ -1,0 +1,49 @@
+{
+	'input': 'please get me story 1',
+	'intent': {
+		'intentName': 'GetStory',
+		'confidenceScore': 1
+	},
+	'siteId': 'mema01',
+	'id': None,
+	'slots': [],
+	'sessionId': 'mema01-porcupine_raspberry-pi-0aa621ad-6ff1-44be-8a0a-65c5668c074f',
+	'customData': 'porcupine_raspberry-pi',
+	'asrTokens': [
+		[{
+			'value': 'please',
+			'confidence': 1,
+			'rangeStart': 0,
+			'rangeEnd': 6,
+			'time': None
+		}, {
+			'value': 'get',
+			'confidence': 1,
+			'rangeStart': 7,
+			'rangeEnd': 10,
+			'time': None
+		}, {
+			'value': 'me',
+			'confidence': 1,
+			'rangeStart': 11,
+			'rangeEnd': 13,
+			'time': None
+		}, {
+			'value': 'story',
+			'confidence': 1,
+			'rangeStart': 14,
+			'rangeEnd': 19,
+			'time': None
+		}, {
+			'value': '1',
+			'confidence': 1,
+			'rangeStart': 20,
+			'rangeEnd': 21,
+			'time': None
+		}]
+	],
+	'asrConfidence': 1,
+	'rawInput': 'please get me story one',
+	'wakewordId': 'porcupine_raspberry-pi',
+	'lang': None
+}

@@ -37,7 +37,7 @@ rapspivid or libcamera? stream to 8160, no audio, works
 raspivid -o - -t 0 -hf -w 800 -h 400 -fps 24 |cvlc -vvv stream:///dev/stdin --sout '#standard{access=http,mux=ts,dst=:8160}' :demux=h264
 
 raspivid to mp4, no audio
-sudo raspivid -o -  -t 60000 -ex night -br 50  -w 1920 -h 1080 -rot 279 -fps 8 | sudo ffmpeg -r 8 -i - -y -vcodec copy /var/spool/mema/vid/test.mp4
+sudo raspivid -o -  -t 60000 -ex night -br 50  -w 1920 -h 1080 -rot 279 -fps 8 | sudo ffmpeg  -nostats -loglevel 0   -r 8 -i - -y -vcodec copy /var/spool/mema/vid/test.mp4
 
 
 

@@ -76,7 +76,7 @@ async def getInformation(info : Request):
         }
     if intent == "TakePhoto":
         print("take photo found")
-        #run_picture_command()
+        run_picture_command()
     elif intent == "GetStory":
         print("get story found")
         story_number = re.findall(r'\b\d+\b', raw_speech)
@@ -88,9 +88,10 @@ async def getInformation(info : Request):
     elif intent == "Associate":
         print("associate photo and story found")
     elif intent == "StoreStory":
-        #run_record_command()
-        print("record story found")
+        run_record_command()
+        #print("record story found")
     elif intent == "RecordVideo":
+        print("record video found")
         run_video_command()        
     else:
         print("nothing found")        
@@ -110,7 +111,8 @@ def run_picture_command():
     return text
     
 def run_record_command():
-    result = subprocess.run([config['main']['story_program']], check=True, capture_output=True, text=True).stdout
+    result = subprocess.run([config['main']['story_program']],  check=False, capture_output=True, text=True).stdout
+    #print(result)
     (text, file_path) = result.split('|')
     
     unix_time = int(datetime.datetime.now().timestamp())
@@ -128,11 +130,7 @@ def run_video_command():
     # make and add file path    
     file_path = config['main']['media_directory'] + 'vid/' + str(unix_time) + '.mp4'     
     video_command = config['main']['video_command'] + ' ' +  file_path
-    #video_command_array = video_command.split()
-    #x = ' '.join(video_command_array)
-    #print(x)
-    #return
-
+   
     try:
         subprocess.run(video_command, shell=True, check=True, capture_output=True, text=True).stdout
     except subprocess.CalledProcessError as e:
@@ -171,7 +169,6 @@ def fetch_all(request: Request):
     cur = con.cursor()
     result = cur.execute("SELECT * FROM memories")
     results = result.fetchall()
-    print(results)
     return TEMPLATES.TemplateResponse(
         "list.html",
         {"request": request, "results" :results}
