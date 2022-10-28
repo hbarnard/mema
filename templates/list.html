@@ -10,7 +10,7 @@ tr:nth-child(even) {
 }
 
 .dotred {
-  height: 25px;
+  height: 1px;
   width: 25px;
   background-color: #f00;
   border-radius: 50%;
@@ -30,10 +30,25 @@ tr:nth-child(even) {
 
 </style>
 <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-<title>Memory Lister: Testing Only</title>
+<title>System Health and Database Lister</title>
 </head>
 
-<h2>Memory Lister: Testing Only</h2>
+
+
+<h2>System Health and Database Lister: Testing Only</h2>
+
+<h3>System Health</h3>
+<table>
+    <tr>
+  {% for key, value in mema_health.items() %}
+    <td>{{key}}</td><td><span class={{ value }}></span></td>
+  {% endfor %}
+  </tr>
+</table>
+
+<hr>
+
+<h3>Database Contents</h3>
 
 <table width="70%">
 <tr>

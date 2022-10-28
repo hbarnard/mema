@@ -2,6 +2,11 @@ from fastapi import FastAPI, Request
 import sys
 import os
 
+# for system health, but pycurl should be used elsewhere
+import pycurl
+from io import BytesIO
+
+
 import subprocess
 import datetime
 import requests
@@ -33,6 +38,44 @@ def curl_speak(phrase):
 
 
 
+# this needs to be elsewhere but 'for the moment'
+
+def system_health():
+
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.WRITEDATA, buffer)
+    c.setopt(pycurl.FAILONERROR, 0)
+
+    # don't test the intent server, used for this display!
+    mema_servers = {
+    'rhasspy_main':'http://10.0.0.76:12101',
+    'mimic3':'http://10.0.0.76:59125',
+    'node_red':'http://10.0.0.76:1880'
+
+    }
+
+    mema_health = {}
+
+    for name,url  in mema_servers.items():
+        try:
+            c.setopt(c.URL, url)
+            c.perform()
+            #print(name + ' ' + 'Response Code: %d' % c.getinfo(c.RESPONSE_CODE))
+            if (c.getinfo(c.RESPONSE_CODE) == 200):
+                mema_health[name] = 'dotgreen'
+            else:
+                mema_health[name] = 'dotred'
+        except:
+            #print(name + ' ' + 'no connection')
+            mema_health[name] = 'dotred'
+
+    #Ending the session and freeing the resources
+    c.close()
+    return mema_health
+
+
+
 config = configparser.ConfigParser()
 config.read('etc/mema.ini')
 
@@ -40,8 +83,10 @@ config.read('etc/mema.ini')
 con = sqlite3.connect(config['main']['db'], check_same_thread=False)
 
 app = FastAPI(debug=True)
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/media", StaticFiles(directory="static/media", html=True), name="media")   
+
+
 BASE_PATH = Path(__file__).resolve().parent
 TEMPLATES = Jinja2Templates(directory=str(BASE_PATH / "templates"))
 
@@ -118,6 +163,13 @@ async def getInformation(info : Request):
         video_number = re.findall(r'\b\d+\b', raw_speech)
         run_label_video_command(video_number)        
         #print("label video found for " + str(video_number))
+    elif intent == "SlicePie":
+        please = re.findall(r'\bplease\b', raw_speech)
+        #print('please is '  + please[0])
+        if not please:
+            curl_speak(config['en_prompts']['nope'])
+        else:
+            curl_speak(config['en_prompts']['ok_then'])                        
     else:
         print("nothing found")        
     return {
@@ -185,6 +237,7 @@ def run_label_video_command(video_number):
             if (text != 'empty'):
                 #print('video number is ' + video_number)
                 cur.execute("update memories set description = ? WHERE memory_id=?",(text, video_number[0]))
+                con.commit()
             else:
                 curl_speak(config['en_prompts']['didnt_get'])
     else:
@@ -214,11 +267,12 @@ def fetch_data(id: int):
 @app.get("/memories")
 def fetch_all(request: Request):
     cur = con.cursor()
+    servers = []
     result = cur.execute("SELECT * FROM memories")
     results = result.fetchall()
     return TEMPLATES.TemplateResponse(
         "list.html",
-        {"request": request, "results" :results}
+        {"request": request, "results" :results, "mema_health": system_health()}
     )
 
 
@@ -240,6 +294,6 @@ def fetch_data(id: int):
     return fields
 
 
-        
+     
     
     
