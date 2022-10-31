@@ -25,6 +25,18 @@ from pathlib import Path
 
 import configparser
 
+from digitalio import DigitalInOut, Direction, Pull
+import adafruit_dotstar
+
+
+def clear_dots()
+
+    DOTSTAR_DATA = board.D5
+    DOTSTAR_CLOCK = board.D6
+    dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
+    dots.deinit()
+    return 
+
 
 # spoken prompts without going back into node-red
 
@@ -74,7 +86,12 @@ def system_health():
     c.close()
     return mema_health
 
+# main here, change to main() in a while
 
+
+
+# ugly but make sure LEDS are cleared when this starts or restarts
+clear_dots()
 
 config = configparser.ConfigParser()
 config.read('etc/mema.ini')
