@@ -40,7 +40,7 @@ def curl_speak(phrase):
 
 # this needs to be elsewhere but 'for the moment'
 
-def system_health():
+def system_health(config):
 
     buffer = BytesIO()
     c = pycurl.Curl()
@@ -49,10 +49,9 @@ def system_health():
 
     # don't test the intent server, used for this display!
     mema_servers = {
-    'rhasspy_main':'http://10.0.0.76:12101',
-    'mimic3':'http://10.0.0.76:59125',
-    'node_red':'http://10.0.0.76:1880'
-
+        'rhasspy'  :  config['main']['rhasspy_main'],
+        'mimic3'   :  config['main']['mimic3'],
+        'node_red' :  config['main']['node_red']
     }
 
     mema_health = {}
@@ -88,10 +87,11 @@ app.mount("/media", StaticFiles(directory="static/media", html=True), name="medi
 
 
 BASE_PATH = Path(__file__).resolve().parent
-TEMPLATES = Jinja2Templates(directory=str(BASE_PATH / "templates"))
+
+# subdirectories for mulitlingual templates
+TEMPLATES = Jinja2Templates(directory=str(BASE_PATH / ("templates" + "/"  + config['main']['language'])))
 
 api_router = APIRouter()
-
 
 # integrate and put into config file.
 '''
@@ -101,26 +101,6 @@ log_config["formatters"]["default"]["fmt"] = "%(asctime)s - %(levelname)s - %(me
 uvicorn.run(app, log_config=log_config)
 uvicorn.run(app, host="0.0.0.0", port=8000, log_config=log_config)
 '''
-
-'''
-or start to use an url for each intent
-def handle_one():
-  do_stuff
-
-def handle_two():
-  do_stuff
-
-def handle_three():
-  do_stuff
-
-
-{'one': handle_one, 
- 'two': handle_two, 
- 'three': handle_three}[option]()
-'''
-
-
-
 
 
 # Python 3.10 has 'match' which would tidy this up a little.
@@ -276,8 +256,32 @@ def fetch_all(request: Request):
     results = result.fetchall()
     return TEMPLATES.TemplateResponse(
         "list.html",
-        {"request": request, "results" :results, "mema_health": system_health()}
+        {"request": request, "results" :results, "mema_health": system_health(config)}
     )
+
+
+# since wordcloud python doesn't currently install on pi4, heres a compromise
+# based on existing external Perl code. 
+@app.get("/wordcloud")
+def fetch_all(request: Request):
+    cur = con.cursor()
+    servers = []
+    result = cur.execute("select description, text from memories")
+    results = result.fetchall()
+    print(results) ;
+    #subprocess.run([config['main']['wordcloud_program']],  check=True, capture_output=True, text=True).stdout
+    string = '' 
+    for result in results:
+        string += ''.join(result)
+        
+    print(string)     
+    return TEMPLATES.TemplateResponse(
+        "list.html",
+        {"request": request, "results" :results, "mema_health": system_health(config)}
+    )
+
+
+
 
 
 # ok ugly should be get, but problem with FastApi see: 

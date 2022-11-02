@@ -1,0 +1,255 @@
+[
+    {
+        "id": "2f1e41c5.19c21e",
+        "type": "tab",
+        "label": "Mema Main Flow",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "619c2bbf77ceb7ab",
+        "type": "debug",
+        "z": "2f1e41c5.19c21e",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "20d1e591be301077",
+        "type": "http request",
+        "z": "2f1e41c5.19c21e",
+        "name": "",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://localhost:8000",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 510,
+        "y": 100,
+        "wires": [
+            [
+                "619c2bbf77ceb7ab"
+            ]
+        ]
+    },
+    {
+        "id": "40eda6b24835e0d2",
+        "type": "mqtt in",
+        "z": "2f1e41c5.19c21e",
+        "name": "",
+        "topic": "hermes/intent/#",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "b74cbd09c1f1bf1c",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 100,
+        "y": 100,
+        "wires": [
+            [
+                "24816e8fd52c05a4"
+            ]
+        ]
+    },
+    {
+        "id": "24816e8fd52c05a4",
+        "type": "change",
+        "z": "2f1e41c5.19c21e",
+        "name": "SessionId",
+        "rules": [
+            {
+                "t": "set",
+                "p": "sessionId",
+                "pt": "global",
+                "to": "payload.sessionId",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 280,
+        "y": 100,
+        "wires": [
+            [
+                "d3aca42480bbaa79"
+            ]
+        ]
+    },
+    {
+        "id": "2f70c631bcbabc14",
+        "type": "template",
+        "z": "2f1e41c5.19c21e",
+        "name": "EndSession",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "{\"sessionId\" : \"{{global.sessionId}}\",\"text\": \"{{payload}}\"}",
+        "output": "str",
+        "x": 110,
+        "y": 500,
+        "wires": [
+            [
+                "907ab880f3013149"
+            ]
+        ]
+    },
+    {
+        "id": "907ab880f3013149",
+        "type": "mqtt out",
+        "z": "2f1e41c5.19c21e",
+        "name": "",
+        "topic": "hermes/dialogManager/endSession",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "b74cbd09c1f1bf1c",
+        "x": 500,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "fb903c23f317095d",
+        "type": "comment",
+        "z": "2f1e41c5.19c21e",
+        "name": "Don't need these yet",
+        "info": "Don't need these yet",
+        "x": 150,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "d3aca42480bbaa79",
+        "type": "switch",
+        "z": "2f1e41c5.19c21e",
+        "name": "",
+        "property": "intent.name",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "GetStory",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "GetStory",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 310,
+        "y": 200,
+        "wires": [
+            [
+                "20d1e591be301077"
+            ],
+            [
+                "aaf280e3c40ad2ce"
+            ]
+        ]
+    },
+    {
+        "id": "aaf280e3c40ad2ce",
+        "type": "http request",
+        "z": "2f1e41c5.19c21e",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://localhost:8000",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 510,
+        "y": 200,
+        "wires": [
+            [
+                "c2929d043f0ad428"
+            ]
+        ]
+    },
+    {
+        "id": "0a0b641fa9c3eef1",
+        "type": "comment",
+        "z": "2f1e41c5.19c21e",
+        "name": "Complex requests with variables",
+        "info": "",
+        "x": 570,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "c2929d043f0ad428",
+        "type": "debug",
+        "z": "2f1e41c5.19c21e",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "b74cbd09c1f1bf1c",
+        "type": "mqtt-broker",
+        "name": "Raspberry PI",
+        "broker": "10.0.0.76",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "3",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
