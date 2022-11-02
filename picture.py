@@ -28,54 +28,57 @@ def curl_speak(phrase):
 from digitalio import DigitalInOut, Direction, Pull
 import adafruit_dotstar
 
-DOTSTAR_DATA = board.D5
-DOTSTAR_CLOCK = board.D6
-dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
-
-# not used immediately, but need 'owner' of picture
-
-database = Database("sqlite:///var/spool/mema/db/memories.db")
-
-config = configparser.ConfigParser()
-config.read('etc/mema.ini')
 
 
+def main():
+    DOTSTAR_DATA = board.D5
+    DOTSTAR_CLOCK = board.D6
+    dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
 
-camera = PiCamera()
-camera.resolution = (1024, 768)
+    database = Database("sqlite:///var/spool/mema/db/memories.db")
+    config = configparser.ConfigParser()
+    config.read('etc/mema.ini')
 
-# can't have this a the moment, no screen
-# camera.start_preview()
-# Camera warm-up time
-dots[0] = (255,0,0)  # red
+    camera = PiCamera()
+    camera.resolution = (1024, 768)
 
-sleep(2)
+    # can't have this a the moment, no screen
+    # camera.start_preview()
+    # Camera warm-up time
+    
+    dots[0] = (255,0,0)  # red
+    sleep(2)
+    
+    unix_time = int(datetime.datetime.now().timestamp())
+    file_path = config['main']['media_directory'] + "pic/" + str(unix_time) + ".jpg" 
 
-unix_time = int(datetime.datetime.now().timestamp())
-file_path = config['main']['media_directory'] + "pic/" + str(unix_time) + ".jpg" 
-#print('taking picture')
+    phrase = config['en_prompts']['taking_picture'].replace(' ','_')
+    curl_speak(phrase)
 
-phrase = config['en_prompts']['taking_picture'].replace(' ','_')
-curl_speak(phrase)
+    camera.capture(file_path)
+    
+    #some feedback
+    dots[0] = (0,255,0)  # red
 
-camera.capture(file_path)
+    camera.close()
+    sleep(2)
 
-dots[0] = (0,255,0)  # red
-#print('picture taken')
+    model = replicate.models.get("j-min/clip-caption-reward")
+    image_file = Path(file_path)
 
-camera.close()
-sleep(2)
+    # prediction phase
+    dots[0] = (255,0,0)  # green
+    phrase = config['en_prompts']['trying_caption'].replace(' ','_')
+    curl_speak(phrase)
 
-model = replicate.models.get("j-min/clip-caption-reward")
-image_file = Path(file_path)
+    sleep(2)
+    dots.deinit()
 
-# prediction phase
-dots[0] = (255,0,0)  # green
+    result = model.predict(image=image_file)
+    print(result  + "|" + file_path)
 
-phrase = config['en_prompts']['trying_caption'].replace(' ','_')
-curl_speak(phrase)
-sleep(2)
-dots.deinit()
+if __name__ == '__main__':
+    main()
+    
 
-result = model.predict(image=image_file)
-print(result  + "|" + file_path)
+

@@ -35,7 +35,7 @@ tr:nth-child(even) {
 
 
 
-<h2>System Health and Database Lister: Testing Only</h2>
+<h2>System Health and Memories</h2>
 
 <h3>System Health</h3>
 <table>
@@ -58,7 +58,7 @@ tr:nth-child(even) {
         <td>Heading</td>
         <td>Text</td>
         <td>File Path</td>
-        <td>Public</td>
+        <td>Public *</td>
         <td>Type</td>
 
 </tr>
@@ -67,7 +67,7 @@ tr:nth-child(even) {
         <td>{{ result[0] }}</td>
         <td>{{ result[1] }}</td>
         <td>{{ result[2] }}</td>
-        <td>{{ result[3] }}</td>
+        <td><a href="{{ result[3] }}">{{ result[3] }}</a></td>
         <td>{{ result[5] }}</td>
         <td>{{ result[7] }}</td>
     </tr>

@@ -18,18 +18,17 @@ from digitalio import DigitalInOut, Direction, Pull
 
 # coloured LEDS on front of voice bonnet, for primitive feedback
 import adafruit_dotstar
-DOTSTAR_DATA = board.D5
-DOTSTAR_CLOCK = board.D6
-dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
+
 
 '''
-Maybe later?
+Maybe later? these are the button controls
 
 button = DigitalInOut(board.D17)
 button.direction = Direction.INPUT
 button.pull = Pull.UP
 '''
-# spoken prompts without going back into node red
+# small spoken prompts without going back into node red
+# use pycurl later
 
 def curl_speak(phrase):
 
@@ -39,73 +38,84 @@ def curl_speak(phrase):
     subprocess.run(cl_array, check=True, capture_output=True).stdout
     return
 
+# main script, need to adjust the sleep times!
 
-# main script
+def main():
 
-config = configparser.ConfigParser()
-config.read('etc/mema.ini')
+    DOTSTAR_DATA = board.D5
+    DOTSTAR_CLOCK = board.D6
+    dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
 
-phrase = config['en_prompts']['start_record'].replace(' ','_')
-curl_speak(phrase)
+    config = configparser.ConfigParser()
+    config.read('etc/mema.ini')
 
-dots[2] = (0,0,255)  # red
+    phrase = config['en_prompts']['start_record'].replace(' ','_')
+    curl_speak(phrase)
 
-try:
-    subprocess.run(["docker", "stop", "rhasspy"], check=True, capture_output=True, text=True).stdout
-except subprocess.CalledProcessError as e:
-    raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+    #feedback before stopping rhasspy
+    dots[2] = (0,0,255)  # red
 
-# make a file name from the current unix timestamp
-unix_time = int(datetime.datetime.now().timestamp())
-file_path = config['main']['media_directory'] + "tmp/" + str(unix_time) + ".wav" 
+    try:
+        subprocess.run(["docker", "stop", "rhasspy"], check=True, capture_output=True, text=True).stdout
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
-sleep(10)
-dots[2] = (255,0,0)  # green
+    # make a file name from the current unix timestamp
+    unix_time = int(datetime.datetime.now().timestamp())
+    file_path = config['main']['media_directory'] + "tmp/" + str(unix_time) + ".wav" 
 
-try:
-    record_command = config['main']['record_command'] + ' ' + file_path
-    record_array = record_command.split()
-    #print(' '.join(record_array))
-    subprocess.run(record_array, check=True, capture_output=True, text=True).stdout
-except subprocess.CalledProcessError as e:
-    raise RuntimeError("command '{}' return here with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+    sleep(10)
+    dots[2] = (255,0,0)  # green
 
-dots[2] = (0,0,255)  # red
+    try:
+        record_command = config['main']['record_command'] + ' ' + file_path
+        record_array = record_command.split()
+        #print(' '.join(record_array))
+        subprocess.run(record_array, check=True, capture_output=True, text=True).stdout
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError("command '{}' return here with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
-try:
-    subprocess.run(["docker", "start", "rhasspy"], check=True, capture_output=True, text=True).stdout
-except subprocess.CalledProcessError as e:
-    raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+    dots[2] = (0,0,255)  # red
 
-sleep(10)  # give rhasspy time to reload!
+    try:
+        subprocess.run(["docker", "start", "rhasspy"], check=True, capture_output=True, text=True).stdout
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
-phrase =  config['en_prompts']['end_record'].replace(' ','_')
-curl_speak(phrase)
+    sleep(10)  # give rhasspy time to reload!
 
-# select speech to text model
-model = replicate.models.get("openai/whisper")
-# format file as path object (openai needs this)
-audio_file = Path(file_path)
+    phrase =  config['en_prompts']['end_record'].replace(' ','_')
+    curl_speak(phrase)
 
-# give a little feedback
-dots[2] = (0,255,0)  # blue
+    # select speech to text model
+    model = replicate.models.get("openai/whisper")
+    # format file as path object (openai needs this)
+    audio_file = Path(file_path)
 
-# speech to text on remote server
-# signal transacription empty if something goes wrong
-result = {"transcription" : "empty"}
-result = model.predict(audio=audio_file)
+    # give a little feedback
+    dots[2] = (0,255,0)  # blue
 
-phrase = config['en_prompts']['end_transcription'].replace(' ','_')
-curl_speak(phrase)
+    # speech to text on remote server
+    # signal transacription empty if something goes wrong
+    result = {"transcription" : "empty"}
+    result = model.predict(audio=audio_file)
 
-# done, feedback, stop blinking lights
-dots[2] = (255,0,0)  # green
-sleep(5)
-dots.deinit()
+    phrase = config['en_prompts']['end_transcription'].replace(' ','_')
+    curl_speak(phrase)
 
-# delete temporary file
-os.remove(file_path)
+    # done, feedback, stop blinking lights
+    dots[2] = (255,0,0)  # green
+    sleep(5)
+    dots.deinit()
 
-# return result and file path to intent server
-# the format of reply is maintained although this doesn't keep a file
-print(result['transcription']  + "|" + 'no_path')
+    # delete temporary file
+    os.remove(file_path)
+
+    # return result and file path to intent server
+    # the format of reply is maintained although this doesn't keep a file
+    print(result['transcription']  + "|" + 'no_path')
+
+if __name__ == '__main__':
+    main()
+
+
