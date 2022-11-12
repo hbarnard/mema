@@ -3,82 +3,109 @@
 from pathlib import Path
 import replicate
 import subprocess
+
 from time import sleep
 import datetime
+import os
 
-from databases import Database
+# convenience, test if pi, assumes voice bonnet though!
+# therefore may need to change for 'definitive' hardware
+pi  = False 
 
-import board
-from picamera import PiCamera
+if os.uname()[4].startswith("arm"): 
+    pi = True 
+
+if pi:
+    import board
+    from picamera import PiCamera
+    # coloured LEDS on front of voice bonnet, for primitive feedback
+    # if no voice bonnet won't need these
+    from digitalio import DigitalInOut, Direction, Pull
+    import adafruit_dotstar
+else:
+    os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+    import pygame
+    import pygame.camera
+    from pygame.locals import *
+    pygame.camera.init()
 
 import configparser
 
 # spoken prompts without going back into node red
 
 def curl_speak(phrase):
-
     cl = '''curl -s --header "Content-Type: text/utf-8"   --request POST  --data '{speech}'   http://localhost:12101/api/text-to-speech'''.format(speech = phrase)
     cl_array = cl.split()
-    #print(cl_array)
-    subprocess.run(cl_array, check=True, capture_output=True).stdout
+    result = subprocess.check_output(cl_array)
+    #print(result)
     return
 
-
-# coloured LEDS on front of voice bonnet, for primitive feedback
-from digitalio import DigitalInOut, Direction, Pull
-import adafruit_dotstar
-
-
-
 def main():
-    DOTSTAR_DATA = board.D5
-    DOTSTAR_CLOCK = board.D6
-    dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
-
-    database = Database("sqlite:///var/spool/mema/db/memories.db")
+    if pi:
+        DOTSTAR_DATA = board.D5
+        DOTSTAR_CLOCK = board.D6
+        dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
+        
     config = configparser.ConfigParser()
     config.read('etc/mema.ini')
 
-    camera = PiCamera()
-    camera.resolution = (1024, 768)
-
+    if pi: 
+        camera = PiCamera()
+        camera.resolution = (1024, 768)
+        dots[0] = (255,0,0)  # red
+    else:
+        camera = pygame.camera.Camera("/dev/video0",(640,480))
+        camera.start()
+        
     # can't have this a the moment, no screen
     # camera.start_preview()
-    # Camera warm-up time
     
-    dots[0] = (255,0,0)  # red
+    # time warm up
     sleep(2)
     
+    # make a file name from the current unix timestamp
     unix_time = int(datetime.datetime.now().timestamp())
-    file_path = config['main']['media_directory'] + "pic/" + str(unix_time) + ".jpg" 
+    file_name = str(unix_time) + ".jpg" 
+    
+    file_path = config['main']['media_directory'] + "pic/" + file_name
+    media_path = config['main']['media_directory_url'] + "pic/" + file_name
+
 
     phrase = config['en_prompts']['taking_picture'].replace(' ','_')
     curl_speak(phrase)
 
-    camera.capture(file_path)
+    if pi: 
+        camera.capture(file_path)
+        camera.close()    
+        #some feedback remove if no voice bonnet
+        dots[0] = (0,255,0)  # red
+    else:
+        img = camera.get_image()
+        pygame.image.save(img,file_path)
     
-    #some feedback
-    dots[0] = (0,255,0)  # red
-
-    camera.close()
     sleep(2)
 
-    model = replicate.models.get("j-min/clip-caption-reward")
     image_file = Path(file_path)
 
     # prediction phase
-    dots[0] = (255,0,0)  # green
+    if pi:
+        #some feedback remove if no voice bonnet
+        dots[0] = (255,0,0)  # green
+        
     phrase = config['en_prompts']['trying_caption'].replace(' ','_')
     curl_speak(phrase)
-
     sleep(2)
-    dots.deinit()
+    
+    if pi:
+        dots.deinit()
 
-    result = model.predict(image=image_file)
-    print(result  + "|" + file_path)
+    result = 'unlabelled photo'
+    if config['main']['use_external_ai']:
+        model = replicate.models.get("j-min/clip-caption-reward")
+        result = model.predict(image=image_file)
+            
+    print(result  + "|" + media_path)
 
 if __name__ == '__main__':
     main()
     
-
-

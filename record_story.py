@@ -6,43 +6,40 @@ import subprocess
 import requests
 import datetime
 from pathlib import Path
-import threading
+import os
+from plumbum import local, FG, BG
 
 import replicate
 
 import configparser
 
-from digitalio import DigitalInOut, Direction, Pull
+# convenience for separating Pi and a random laptop
+pi = False
+if os.uname()[4].startswith("arm"): 
+    pi = True 
 
-# coloured LEDS on front of voice bonnet, for primitive feedback
-import adafruit_dotstar
+if pi:
+    import board
+    from picamera import PiCamera
+    # coloured LEDS on front of voice bonnet, for primitive feedback
+    from digitalio import DigitalInOut, Direction, Pull
+    import adafruit_dotstar
+    DOTSTAR_DATA = board.D5
+    DOTSTAR_CLOCK = board.D6
+    dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
 
 
-'''
-Maybe later?
-
-button = DigitalInOut(board.D17)
-button.direction = Direction.INPUT
-button.pull = Pull.UP
-'''
 # spoken prompts without going back into node red
 
 def curl_speak(phrase):
-
-    cl = '''curl -s --header "Content-Type: text/utf-8"   --request POST  --data '{speech}'   http://localhost:12101/api/text-to-speech'''.format(speech = phrase)
+    cl = '''curl -s --header "Content-Type: text/utf-8"   --request POST  --data '{speech}'   http://localhost:12101/api/text-to-speech > /dev/null'''.format(speech = phrase)
     cl_array = cl.split()
-    #print(cl_array)
-    subprocess.run(cl_array, check=True, capture_output=True).stdout
+    subprocess.call(cl_array,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
     return
 
 
 # main script
-
 def main():
-
-    DOTSTAR_DATA = board.D5
-    DOTSTAR_CLOCK = board.D6
-    dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
 
     config = configparser.ConfigParser()
     config.read('etc/mema.ini')
@@ -51,31 +48,34 @@ def main():
     curl_speak(phrase)
     sleep(1)
 
-
     try:
-        subprocess.run(["docker", "stop", "rhasspy"], check=True, capture_output=True, text=True).stdout
+        subprocess.run(["docker", "stop", "rhasspy"], check=True)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
     # make a file name from the current unix timestamp
     unix_time = int(datetime.datetime.now().timestamp())
-    file_path = config['main']['media_directory'] + "rec/" + str(unix_time) + ".wav" 
+    file_name = str(unix_time) + ".wav" 
+    
+    file_path = config['main']['media_directory'] + "rec/" + file_name
+    media_path = config['main']['media_directory_url'] + "rec/" + file_name
 
     sleep(1)
-    dots[0] = (255,0,0)  # green
+    if pi:
+        dots[0] = (255,0,0)  # green
 
     try:
         record_command = config['main']['record_command'] + ' ' + file_path
         record_array = record_command.split()
-        #print(' '.join(record_array))
-        subprocess.run(record_array, check=True, capture_output=True, text=True).stdout
+        subprocess.call(record_array, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return here with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
-    dots[0] = (0,0,255)  # red
+    if pi:
+        dots[0] = (0,0,255)  # red
 
     try:
-        subprocess.run(["docker", "start", "rhasspy"], check=True, capture_output=True, text=True).stdout
+        subprocess.run(["docker", "start", "rhasspy"], check=True)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
@@ -84,29 +84,37 @@ def main():
     phrase =  config['en_prompts']['end_record'].replace(' ','_')
     curl_speak(phrase)
 
-
     # select speech to text model
     model = replicate.models.get("openai/whisper")
     # format file as path object (openai needs this)
     audio_file = Path(file_path)
 
     # give a little feedback
-    dots[0] = (0,255,0)  # blue
+    if pi:
+        dots[0] = (0,255,0)  # blue
 
+    # probably in configuration later
+    text = 'no label'
+   
     # speech to text on remote server
-    result = model.predict(audio=audio_file)
-
-    phrase = config['en_prompts']['end_transcription'].replace(' ','_')
+    if config['main']['use_external_ai']:
+        result = model.predict(audio=audio_file)
+        text = result['transcription'] 
+        phrase = config['en_prompts']['end_transcription'].replace(' ','_')
+        
+    phrase = config['en_prompts']['done']
     curl_speak(phrase)
 
     # done, feedback, stop blinking lights
-    dots[0] = (255,0,0)  # green
-    sleep(5)
-    dots.deinit()
-
+    if pi:
+        dots[0] = (255,0,0)  # green
+        dots.deinit()
+    
     # return result and file path to intent server
-    print(result['transcription']  + "|" + file_path)
+    print(text + "|" + media_path)
 
 if __name__ == '__main__':
     main()
+
+
 

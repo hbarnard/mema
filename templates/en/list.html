@@ -31,6 +31,7 @@ tr:nth-child(even) {
 </style>
 <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 <title>System Health and Database Lister</title>
+<meta http-equiv="refresh" content="30;url=/memories" />
 </head>
 
 
@@ -48,9 +49,9 @@ tr:nth-child(even) {
 
 <hr>
 
-<h3>Current Memories</h3>
+<h3>Database Contents</h3>
 
-<table width="70%">
+<table>
 <tr>
     
  
@@ -59,6 +60,7 @@ tr:nth-child(even) {
         <td>Text</td>
         <td>File Path</td>
         <td>Public *</td>
+        <td>Recorded</td>
         <td>Type</td>
 
 </tr>
@@ -69,6 +71,7 @@ tr:nth-child(even) {
         <td>{{ result[2] }}</td>
         <td><a href="{{ result[3] }}">{{ result[3] }}</a></td>
         <td>{{ result[5] }}</td>
+        <td>{{ result[4] }}</td>
         <td>{{ result[7] }}</td>
     </tr>
 {% endfor %}

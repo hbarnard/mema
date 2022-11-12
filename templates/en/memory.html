@@ -1,0 +1,61 @@
+<head>
+<style>
+table, th, td, tr {
+  border: 1px ;
+  // color: red ;
+}
+
+tr:nth-child(even) {
+  background-color: LightBlue;
+}
+
+.dotred {
+  height: 1px;
+  width: 25px;
+  background-color: #f00;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+
+.dotgreen {
+  height: 25px;
+  width: 25px;
+  background-color: #0f0;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+</style>
+<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+<title>Memory Page</title>
+</head>
+
+
+<h2>Memory Page</h2>
+
+<table width="70%">
+<tr>
+    
+ 
+        <td>Rec No</td>
+        <td>Heading</td>
+        <td>Text</td>
+        <td>File Path</td>
+        <td>Public *</td>
+        <td>Type</td>
+
+</tr>
+{% for field in fields %}
+    <tr>
+        <td>{{ field[0] }}</td>
+        <td>{{ field[1] }}</td>
+        <td>{{ field[2] }}</td>
+        <td><a href="{{ field[3] }}">{{ field[3] }}</a></td>
+        <td>{{ field[5] }}</td>
+        <td>{{ field[7] }}</td>
+    </tr>
+{% endfor %}
+
+</table>
+
