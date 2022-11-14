@@ -11,6 +11,7 @@ from io import BytesIO
 # get rid of one of these too, keep subprocess if possible
 import subprocess
 from plumbum import FG, BG, local
+import threading
 
 import datetime
 from pathlib import Path
@@ -26,10 +27,23 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import re
 
+# currently this is a hard install, look at https://github.com/amueller/word_cloud and stackoverflow for help
+from wordcloud import WordCloud
+
 import sqlite3
-
-
 import configparser
+
+
+class run_subprocess(threading.Thread):
+    def __init__(self,command):
+        self.stdout = None
+        self.stderr = None
+        threading.Thread.__init__(self)
+        self.command = command
+
+    def run(self):
+        p = subprocess.call(self.command, shell=True)
+        #self.stdout, self.stderr = p.communicate()
 
 # spoken prompts without going back into node red
 def curl_speak(phrase):
@@ -86,8 +100,11 @@ TEMPLATES = Jinja2Templates(directory=str(BASE_PATH / "templates"))
 
 api_router = APIRouter()
 
+# convenience for separating Pi and a random laptop
+pi = False
+if os.uname()[4].startswith("arm"): 
+    pi = True 
 
-# integrate and put into config file.
 '''
 log_config = uvicorn.config.LOGGING_CONFIG
 log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
@@ -112,11 +129,8 @@ async def info(info : Request):
         return {
             "status" : "FAIL"
         }
-    
-
-    
-    print(req_info) if config['main']['debug'] else None
-    
+        
+    print(req_info) if config['main']['debug'] else None    
     # one or two, such as redirects can't be handled in the intent table
     if intent == "GetStory":
         url = config['main']['intent_server'] + "/memory/" + str(story_number[0]) + "/speak"
@@ -133,7 +147,8 @@ async def info(info : Request):
         'KillVideo'  : run_kill_video_command,  
         'LabelVideo' : run_label_video_command,       
         'SlicePie'   : run_pie,
-        'DuckDuck'   : run_search_command            
+        'DuckDuck'   : run_search_command
+        'LetsGo'     : run_xdg_opem       
 
     }[intent](number,please)
     
@@ -197,12 +212,25 @@ def run_video_command(number,please):
     
     unix_time = int(datetime.datetime.now().timestamp())    
     
-    # make and add file path    
-    file_path = config['main']['media_directory'] + 'vid/' + str(unix_time) + '.mp4'     
-    video_command = config['main']['video_command'] + ' ' +  file_path
+    # make a file name from the current unix timestamp
+    unix_time = int(datetime.datetime.now().timestamp())
+    file_name = str(unix_time) + ".ogg" 
+    
+    file_path = config['main']['media_directory'] + "vid/" + file_name
+    media_path = config['main']['media_directory_url'] + "vid/" + file_name
+    video_command = config['main']['video_command']
    
     try:
-        subprocess.call(video_command, shell=True)
+        if pi:
+            my_video = run_subprocess(video_command)
+        else:
+            revised_command = re.sub(r"file_name", file_path, video_command)
+            # subprocess.call(video_command, shell=True)
+            print(revised_command)
+            my_video = run_subprocess(revised_command)
+        my_video.start()
+        my_video.join()
+        
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
         
@@ -211,7 +239,7 @@ def run_video_command(number,please):
     text = 'unlabelled video'
     
     cur = con.cursor()
-    cur.execute("INSERT INTO memories (description, text, file_path, unix_time, public, owner, type) values (?, ?,?, ?, ?, ?,? )", (description, text, file_path, unix_time, 0, 1, 'video'))
+    cur.execute("INSERT INTO memories (description, text, file_path, unix_time, public, owner, type) values (?, ?,?, ?, ?, ?,? )", (description, text, media_path, unix_time, 0, 1, 'video'))
     con.commit()
     return text      
 
@@ -286,9 +314,32 @@ def run_search_command(number,please):
 
 def run_pie(number,please):
     return
+
+
+def run_xdg_open(number,please):
+    return    
+
+#FIXME: move somewhere else!
+    
+def wordcloud():
+    # Generate a word cloud image
+    cur = con.cursor()
+    res = cur.execute("select description, text, type from memories")
+    results = res.fetchall()
+    cur.close()
+    big_string = '' 
+    for result in results:
+        string = (' ').join(result)
+        big_string = big_string + ' ' + string
+    wordcloud_svg = WordCloud(background_color='red').generate(big_string).to_svg()
+    f = open("static/wordcloud.svg","w+")
+    f.write(wordcloud_svg )
+    f.close()   
+         
+    # wordcloud.to_file('static/example.jpg')
+    return
   
 # screen only section
-
 # testing only, make sure favicon isn't constantly 404ed
 
 @app.get('/favicon.ico')
@@ -296,16 +347,25 @@ async def favicon():
    return FileResponse('./static/favicon.ico')
  
 
+# this is svg at present, because it'll offer 'us' better
+# interface possiblities than jpeg, later on
+
+@app.get('/wordcloud')
+async def get_wordcloud():
+   return FileResponse('./static/wordcloud.svg')
+
+
 # list of memories to screen    
 
 @app.get("/memories")
 def fetch_all(request: Request):
     cur = con.cursor()
-    servers = []
     # result = cur.execute("SELECT * FROM memories")
-    result = cur.execute("select memory_id, description, text, file_path, strftime('%d-%m-%Y %H:%M', unix_time, 'unixepoch') as date, public from memories")
+    result = cur.execute("select memory_id, description, file_path, strftime('%d-%m-%Y %H:%M', unix_time, 'unixepoch') as date, public, type from memories")
 
     results = result.fetchall()
+    cur.close()
+    #wordcloud() not here, in a cron
     return TEMPLATES.TemplateResponse(
         "list.html",
         {"request": request, "results" :results, "mema_health": system_health()}
