@@ -30,35 +30,29 @@ tr:nth-child(even) {
 
 </style>
 <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-<title>System Health and Database Lister</title>
+<title>Memories</title>
 <meta http-equiv="refresh" content="30;url=/memories" />
 </head>
 
 
 
-<h2>System Health and Memories</h2>
+<h2>Memories</h2>
 
-<h3>System Health</h3>
-<table>
-    <tr>
-  {% for key, value in mema_health.items() %}
-    <td>{{key}}</td><td><span class={{ value }}></span></td>
-  {% endfor %}
-  </tr>
-</table>
-
+<img src="static/wordcloud.svg" />
+{% if "type" in request.query_params: %}
+<img src="static/Neuroscience.gif" width=400 height=200 />
+{% else %}
+<img src="static/Neuroscience.jpeg" width=400 height=200 />
+{% endif %}
 <hr>
-
-<h3>Database Contents</h3>
 
 <table>
 <tr>
     
  
-        <td>Rec No</td>
+        <td>No</td>
         <td>Heading</td>
-        <td>Text</td>
-        <td>File Path</td>
+       <!-- <td>File Path</td> -->
         <td>Public *</td>
         <td>Recorded</td>
         <td>Type</td>
@@ -66,13 +60,13 @@ tr:nth-child(even) {
 </tr>
 {% for result in results %}
     <tr>
-        <td>{{ result[0] }}</td>
-        <td>{{ result[1] }}</td>
-        <td>{{ result[2] }}</td>
-        <td><a href="{{ result[3] }}">{{ result[3] }}</a></td>
-        <td>{{ result[5] }}</td>
+        <td><a href="memory/{{ result[0] }}">{{ result[0] }}</a></td>
+        <td><a href="{{ result[2] }}">{{ result[1] }}</a></td>
+     <!--   <td>{{ result[2] }}</td> -->
+     <!--   <td><a href="{{ result[2] }}">{{ result[2] }}</a></td> -->
         <td>{{ result[4] }}</td>
-        <td>{{ result[7] }}</td>
+        <td>{{ result[3] }}</td>
+        <td>{{ result[5] }}</td>
     </tr>
 {% endfor %}
 

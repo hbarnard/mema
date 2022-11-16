@@ -139,20 +139,21 @@ async def info(info : Request):
     # intents are the options see: https://stackoverflow.com/questions/17881409/whats-an-alternative-to-if-elif-statements-in-python
     {
 
-        'TakePhoto'  : run_photo_command,
-        'TellStory'  : print("tell story found"),   
-        'Associate'  : print("associate photo and story found"),
-        'RecordStory': run_record_command,
-        'RecordVideo': run_video_command,
-        'KillVideo'  : run_kill_video_command,  
-        'LabelVideo' : run_label_video_command,       
-        'SlicePie'   : run_pie,
-        'DuckDuck'   : run_search_command
-        'LetsGo'     : run_xdg_opem       
+        'TakePhoto'      : run_photo_command,
+        'TellStory'      : print("tell story found"),   
+        'Associate'      : print("associate photo and story found"),
+        'RecordStory'    : run_record_command,
+        'RecordVideo'    : run_video_command,
+        'KillVideo'      : run_kill_video_command,  
+        'LabelVideo'     : run_label_video_command,       
+        'SlicePie'       : run_pie,
+        'SearchPage'     : run_search_command,
+        'LetsGo'         : run_xdg_open,
+        'SearchMemories' : run_search_memories      
 
     }[intent](number,please)
     
-    req_info = ''   
+    #print(req_info)   
  
     print("command done") if config['main']['debug'] else None
     
@@ -171,6 +172,10 @@ def notAfun():
 def run_photo_command(number,please):
     
     print("take photo found") if config['main']['debug'] else None
+    command = config['main']['xdg_open_command'] + '?type=thinking'
+    xdg_open_array = command.split()
+    subprocess.call(xdg_open_array, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
         
     cur = con.cursor()
     picture = local[config['main']['picture_program']]
@@ -203,40 +208,22 @@ def run_record_command(number,please):
     return text  
     
 # doesn't work properly on laptop  
-
 # record video and store it
   
 def run_video_command(number,please):
     
     print("record video found") if config['main']['debug'] else None
     
-    unix_time = int(datetime.datetime.now().timestamp())    
+    result = subprocess.check_output(config['main']['video_program'])
+    result_string = result.decode('utf-8')
+
+    (text, file_path) = result_string.split('|')
     
-    # make a file name from the current unix timestamp
     unix_time = int(datetime.datetime.now().timestamp())
-    file_name = str(unix_time) + ".ogg" 
-    
-    file_path = config['main']['media_directory'] + "vid/" + file_name
-    media_path = config['main']['media_directory_url'] + "vid/" + file_name
-    video_command = config['main']['video_command']
-   
-    try:
-        if pi:
-            my_video = run_subprocess(video_command)
-        else:
-            revised_command = re.sub(r"file_name", file_path, video_command)
-            # subprocess.call(video_command, shell=True)
-            print(revised_command)
-            my_video = run_subprocess(revised_command)
-        my_video.start()
-        my_video.join()
-        
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-        
-    #FIXME: how to deal with this, Google cloud?
+    description = text[0:30]   
+
+    #FIXME: into multilingual parameters, later on
     description = 'unlabelled video'
-    text = 'unlabelled video'
     
     cur = con.cursor()
     cur.execute("INSERT INTO memories (description, text, file_path, unix_time, public, owner, type) values (?, ?,?, ?, ?, ?,? )", (description, text, media_path, unix_time, 0, 1, 'video'))
@@ -298,53 +285,32 @@ def run_associate_command(number,please):
 # skeletion get search page, see https://community.rhasspy.org/t/recognized-untrain-sentences-words/465/5
 # discussion of wildcards
 
-def run_search_command(number,please):
+def run_search_command(number,please): 
 
-    r = req.get('https://duckduck.com?q=hughbarnard')
-    #xdg-open https://google.com
-    print(r.text)
-    if (r.status_code == 200):
-        print(r.text)
-        return TEMPLATES.TemplateResponse(
-        "search.html",
-        {"request": r, "content": r.text}
-    )
-    else:
-        return
+    return
 
 def run_pie(number,please):
     return
 
-
 def run_xdg_open(number,please):
+    xdg_open_command = config['main']['xdg_open_command']
+    my_xdg = run_subprocess(xdg_open_command)
+    my_xdg.start() 
+    my_xdg.join()     
+ 
+    #subprocess.call(xdg_open_array, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return    
 
-#FIXME: move somewhere else!
-    
-def wordcloud():
-    # Generate a word cloud image
-    cur = con.cursor()
-    res = cur.execute("select description, text, type from memories")
-    results = res.fetchall()
-    cur.close()
-    big_string = '' 
-    for result in results:
-        string = (' ').join(result)
-        big_string = big_string + ' ' + string
-    wordcloud_svg = WordCloud(background_color='red').generate(big_string).to_svg()
-    f = open("static/wordcloud.svg","w+")
-    f.write(wordcloud_svg )
-    f.close()   
-         
-    # wordcloud.to_file('static/example.jpg')
-    return
-  
-# screen only section
-# testing only, make sure favicon isn't constantly 404ed
+def run_search_memories(number,please):
+    curl_speak('found_a_set_of_memories')
+    return    
+      
+#---------- screen only section
 
-@app.get('/favicon.ico')
-async def favicon():
-   return FileResponse('./static/favicon.ico')
+#FIXME: testing only, make sure favicon isn't constantly 404ed
+# @app.get('/favicon.ico')
+# async def favicon():
+#   return FileResponse('./static/favicon.ico')
  
 
 # this is svg at present, because it'll offer 'us' better
@@ -362,7 +328,6 @@ def fetch_all(request: Request):
     cur = con.cursor()
     # result = cur.execute("SELECT * FROM memories")
     result = cur.execute("select memory_id, description, file_path, strftime('%d-%m-%Y %H:%M', unix_time, 'unixepoch') as date, public, type from memories")
-
     results = result.fetchall()
     cur.close()
     #wordcloud() not here, in a cron
