@@ -49,7 +49,7 @@ def main():
     sleep(1)
 
     try:
-        subprocess.run(["docker", "stop", "rhasspy"], check=True)
+        subprocess.run(["docker", "stop", "rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
@@ -75,7 +75,7 @@ def main():
         dots[0] = (0,0,255)  # red
 
     try:
-        subprocess.run(["docker", "start", "rhasspy"], check=True)
+        subprocess.run(["docker", "start", "rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 

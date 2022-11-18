@@ -26,9 +26,25 @@ tr:nth-child(even) {
   display: inline-block;
 }
 
-
-
 </style>
+
+<script>
+            var ws = new WebSocket("ws://localhost:8000/ws");
+            ws.onmessage = function(event) {
+                var messages = document.getElementById('messages')
+                var message = document.createElement('li')
+                var content = document.createTextNode(event.data)
+                message.appendChild(content)
+                messages.appendChild(message)
+            };
+            function sendMessage(event) {
+                var input = document.getElementById("messageText")
+                ws.send(input.value)
+                input.value = ''
+                event.preventDefault()
+            }
+</script>
+
 <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 <title>Memories</title>
 <meta http-equiv="refresh" content="30;url=/memories" />

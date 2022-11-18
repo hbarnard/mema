@@ -52,7 +52,8 @@ if pi:
     dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
 
 
-# spoken prompts without going back into node red
+#FIXME: spoken prompts without going back into node red
+# can do this via Rhasspy, more integrated since changing central config would change spoken choice
 
 def curl_speak(phrase):
     cl = '''curl -s --header "Content-Type: text/utf-8"   --request POST  --data '{speech}'   http://localhost:12101/api/text-to-speech > /dev/null'''.format(speech = phrase)
@@ -67,18 +68,18 @@ def main():
     config = configparser.ConfigParser()
     config.read('etc/mema.ini')
 
-    phrase = config['en_prompts']['start_record'].replace(' ','_')
+    phrase = config['en_prompts']['start_video'].replace(' ','_')
     curl_speak(phrase)
     sleep(1)
 
     try:
-        subprocess.run(["docker", "stop", "rhasspy"], check=True)
+        subprocess.run(["docker", "stop", "rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
     # make a file name from the current unix timestamp
     unix_time = int(datetime.datetime.now().timestamp())
-    file_name = str(unix_time) + ".wav" 
+    file_name = str(unix_time) + ".avi" 
     
     file_path = config['main']['media_directory'] + "vid/" + file_name
     media_path = config['main']['media_directory_url'] + "vid/" + file_name
@@ -93,9 +94,10 @@ def main():
         if pi:
             subprocess.call(video_command)
         else:
-            revised_command = re.sub(r"file_name", file_path, video_command)
-            subprocess.call(revised_command, shell=True, timeout=10)
-            #print(revised_command)
+            rev_command = re.sub(r"file_name", file_path, video_command)
+            revised_command = re.sub(r"video_maximum", config['main']['video_maximum'], rev_command)
+            subprocess.call(revised_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            print(revised_command)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
         
@@ -105,7 +107,7 @@ def main():
         dots[0] = (0,0,255)  # red
 
     try:
-        subprocess.run(["docker", "start", "rhasspy"], check=True)
+        subprocess.run(["docker", "start", "rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
@@ -120,8 +122,8 @@ def main():
     #    text = result['transcription'] 
     #    phrase = config['en_prompts']['end_transcription'].replace(' ','_')
         
-    phrase = config['en_prompts']['done']
-    curl_speak(phrase)
+    #phrase = config['en_prompts']['done']
+    #curl_speak(phrase)
 
     # done, feedback, stop blinking lights
     if pi:

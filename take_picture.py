@@ -54,6 +54,7 @@ def main():
         camera.resolution = (1024, 768)
         dots[0] = (255,0,0)  # red
     else:
+        #print('camera starting') if config['main']['debug'] else None    
         camera = pygame.camera.Camera("/dev/video0",(640,480))
         camera.start()
         
@@ -80,6 +81,7 @@ def main():
         #some feedback remove if no voice bonnet
         dots[0] = (0,255,0)  # red
     else:
+        #print('camera getting image') if config['main']['debug'] else None   
         img = camera.get_image()
         pygame.image.save(img,file_path)
     
@@ -92,8 +94,6 @@ def main():
         #some feedback remove if no voice bonnet
         dots[0] = (255,0,0)  # green
         
-    phrase = config['en_prompts']['trying_caption'].replace(' ','_')
-    curl_speak(phrase)
     sleep(2)
     
     if pi:
@@ -101,6 +101,10 @@ def main():
 
     result = 'unlabelled photo'
     if config['main']['use_external_ai']:
+        phrase = config['en_prompts']['trying_caption'].replace(' ','_')
+        curl_speak(phrase)
+        
+        #print('using ai caoptioning') if config['main']['debug'] else None   
         model = replicate.models.get("j-min/clip-caption-reward")
         result = model.predict(image=image_file)
             
