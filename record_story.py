@@ -3,7 +3,7 @@
 from time import sleep
 import board
 import subprocess
-import requests
+#import requests
 import datetime
 from pathlib import Path
 import os
@@ -49,7 +49,7 @@ def main():
     sleep(1)
 
     try:
-        subprocess.run(["docker", "stop", "rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["docker", "stop", "mema_rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
@@ -75,19 +75,16 @@ def main():
         dots[0] = (0,0,255)  # red
 
     try:
-        subprocess.run(["docker", "start", "rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["docker", "start", "mema_rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
-    sleep(5)  # give rhasspy time to reload!
+    sleep(5)  # give mema_rhasspy time to reload!
 
     phrase =  config['en_prompts']['end_record'].replace(' ','_')
     curl_speak(phrase)
 
-    # select speech to text model
-    model = replicate.models.get("openai/whisper")
-    # format file as path object (openai needs this)
-    audio_file = Path(file_path)
+
 
     # give a little feedback
     if pi:
@@ -98,12 +95,16 @@ def main():
    
     # speech to text on remote server
     if config['main']['use_external_ai']:
+        # select speech to text model
+        model = replicate.models.get("openai/whisper")
+        # format file as path object (openai needs this)
+        audio_file = Path(file_path)
         result = model.predict(audio=audio_file)
         text = result['transcription'] 
         phrase = config['en_prompts']['end_transcription'].replace(' ','_')
-        
-    phrase = config['en_prompts']['done']
-    curl_speak(phrase)
+    else:        
+        phrase = config['en_prompts']['done']
+        curl_speak(phrase)
 
     # done, feedback, stop blinking lights
     if pi:

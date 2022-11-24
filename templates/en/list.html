@@ -3,6 +3,7 @@
 table, th, td, tr {
   border: 1px ;
   // color: red ;
+  padding: 5px;
 }
 
 tr:nth-child(even) {
@@ -29,25 +30,35 @@ tr:nth-child(even) {
 </style>
 
 <script>
-            var ws = new WebSocket("ws://localhost:8000/ws");
+        /*    var ws = new WebSocket("ws://10.0.0.86:8000/ws");
             ws.onmessage = function(event) {
                 var messages = document.getElementById('messages')
-                var message = document.createElement('li')
-                var content = document.createTextNode(event.data)
-                message.appendChild(content)
-                messages.appendChild(message)
+                // var message = document.createElement('li')
+                //var content = document.createTextNode(event.data)
+                document.getElementById('messages').innerHTML = event.data
+                // message.appendChild(content)
+                // messages.appendChild(message)
             };
             function sendMessage(event) {
-                var input = document.getElementById("messageText")
-                ws.send(input.value)
-                input.value = ''
+               // var input = document.getElementById("messageText")
+               // ws.send(input.value)
+               // input.value = ''
+              if  (ws.readyState == 1) {
+                ws.send('wakeup')
+              } else { 
                 event.preventDefault()
+              }  
             }
+
+           setInterval(sendMessage, 30000); 
+          */  
+            
+            
 </script>
 
 <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 <title>Memories</title>
-<meta http-equiv="refresh" content="30;url=/memories" />
+<meta http-equiv="refresh" content="30;url=/memories.html" />
 </head>
 
 
@@ -58,15 +69,16 @@ tr:nth-child(even) {
 {% if "type" in request.query_params: %}
 <img src="static/Neuroscience.gif" width=400 height=200 />
 {% else %}
-<img src="static/Neuroscience.jpeg" width=400 height=200 />
+<img src="static/Neuroscience.gif" width=400 height=200 />
 {% endif %}
-<hr>
-
+<hr/>
+       <span id='messages'></span>
+<hr/>
 <table>
 <tr>
     
  
-        <td>No</td>
+        <td>No.</td>
         <td>Heading</td>
        <!-- <td>File Path</td> -->
         <td>Public *</td>

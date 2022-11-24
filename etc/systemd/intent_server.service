@@ -4,6 +4,8 @@ Description=Intent Server for Mema: Executes Known Voice Commands
 After=network.target
 
 [Service]
+User=hbarnard
+Group=users
 PermissionsStartOnly = true
 PIDFile=/run/mema/intent_server.pid
 WorkingDirectory=/usr/share/pyshared/mema

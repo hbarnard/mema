@@ -3,7 +3,7 @@
 from time import sleep
 import board
 import subprocess
-import requests
+#FIXME: get rid, seems to be incompatilities: import requests
 import datetime
 from pathlib import Path
 import os
@@ -64,7 +64,7 @@ def curl_speak(phrase):
 
 # main script
 def main():
-
+    #print('in record video')
     config = configparser.ConfigParser()
     config.read('etc/mema.ini')
 
@@ -73,47 +73,61 @@ def main():
     sleep(1)
 
     try:
-        subprocess.run(["docker", "stop", "rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["docker", "stop", "mema_rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
     # make a file name from the current unix timestamp
     unix_time = int(datetime.datetime.now().timestamp())
-    file_name = str(unix_time) + ".avi" 
     
-    file_path = config['main']['media_directory'] + "vid/" + file_name
-    media_path = config['main']['media_directory_url'] + "vid/" + file_name
-
+    #FIXME: avi is currently processed into mp4
+    tmp_file_name = str(unix_time) + ".ogg" 
+    true_file_name = str(unix_time) + ".mp4" 
+    
     sleep(1)
     if pi:
         dots[0] = (255,0,0)  # green
 
     video_command = config['main']['video_command']
 
+    tmp_file_path = config['main']['media_directory'] + "tmp/" + tmp_file_name
+    true_file_path = config['main']['media_directory'] + "vid/" + tmp_file_name
+    media_path = config['main']['media_directory_url'] + "vid/" + tmp_file_name   
+
     try:
         if pi:
             subprocess.call(video_command)
         else:
-            rev_command = re.sub(r"file_name", file_path, video_command)
+            # record as avi
+            rev_command = re.sub(r"tmp_file_name", true_file_path, video_command)
             revised_command = re.sub(r"video_maximum", config['main']['video_maximum'], rev_command)
+            #print('revised command ' + str(revised_command))
             subprocess.call(revised_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            print(revised_command)
+            # convert to mpeg
+            #rev_ffmpeg = re.sub(r"file_name", tmp_file_path, config['main']['ffmpeg_command'])
+            #revised_ffmpeg = re.sub(r"output_file", true_file_path, rev_ffmpeg)
+            #subprocess.call(revised_ffmpeg, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+            #print(revised_command)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-        
-    text = 'unlabelled video'
+    
+    
+    file_path = config['main']['media_directory'] + "vid/" + tmp_file_name
+    media_path = config['main']['media_directory_url'] + "vid/" + tmp_file_name    
+    
 
     if pi:
         dots[0] = (0,0,255)  # red
 
     try:
-        subprocess.run(["docker", "start", "rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["docker", "start", "mema_rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
-    sleep(5)  # give rhasspy time to reload!
+    sleep(5)  # give mema_rhasspy time to reload!
 
-    phrase =  config['en_prompts']['end_record'].replace(' ','_')
+    phrase =  config['en_prompts']['end_video'].replace(' ','_')
     curl_speak(phrase)
    
     # FIXME: No analysis for video at present
@@ -131,7 +145,7 @@ def main():
         dots.deinit()
 
     # probably in configuration later
-    text = 'no label'
+    text = 'unlabelled video'
         
     # return result and file path to intent server
     print(text + "|" + media_path)
