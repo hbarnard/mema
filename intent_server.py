@@ -114,6 +114,14 @@ def system_health():
         except:
             mema_health[name] = 'dotred'
     c.close()
+    
+    # test whether wifi is up
+    text_string = Path('/proc/net/wireless').read_text()
+    m = re.match(r"wlp2s0", text_string)
+    if m:
+        mema_health['wifi'] = 'dotgreen'
+    else:
+        mema_health['wifi'] = 'dotred'
     return mema_health
 
 def timer_function():  
