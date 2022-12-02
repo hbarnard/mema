@@ -1,64 +1,62 @@
-aiocontextvars >= 0.2.2
-anyio >= 3.6.1
-asgiref >= 3.4.1
-asn1crypto >= 0.24.0
-attr >= 0.3.2
-attrs >= 22.1.0
-board >= 1.0
-certifi >= 2021.10.8
-chardet >= 5.0.0
-charset-normalizer >= 2.0.12
-click >= 8.0.4
-configobj >= 5.0.6
-contextlib2 >= 21.6.0
-contextvars >= 2.4
-docopt >= 0.6.2
-docutils >= 0.18.1
-fastapi >= 0.79.0
-greenlet >= 2.0.0
-gruut-ipa >= 0.13.0
-gunicorn >= 20.1.0
-h11 >= 0.13.0
-httptools >= 0.3.0
-idna >= 3.3
-immutables >= 0.18
-importlib-metadata >= 4.8.3
-importlib-resources >= 5.4.0
-Jinja2 >= 3.0.3
-jmespath >= 0.10.0
-numpy-camera >= 0.0.2
-opencv-camera >= 0.10.11
-opencv-python >= 4.6.0.66
-packaging >= 21.3
-pafy >= 0.5.5
-Pillow-PIL >= 0.1.dev0
-pip >= 9.0.1
-plumb >= 1.2.5
-pycrypto >= 2.6.1
-pydantic >= 1.9.1
-pygame >= 2.1.2
-pyparsing >= 3.0.9
-pyscard >= 2.0.0
-python-apt >= 1.6.5+ubuntu0.7
-python-dateutil >= 2.8.2
-python-dotenv >= 0.20.0
-python-vlc >= 3.0.16120
-pytz >= 2022.1
-pyxdg >= 0.25
-PyYAML >= 6.0
-replicate >= 0.4.0
-requests >= 2.27.1
-Rx >= 3.2.0
-s3transfer >= 0.1.13
-SecretStorage >= 2.3.1
-setuptools >= 59.6.0
-simple-term-menu >= 1.2.1
-simplejson >= 3.17.6
-six >= 1.16.0
-slurm >= 0.4.6
-sniffio >= 1.2.0
-SQLAlchemy >= 1.4.42
-tqdm >= 4.64.1
+aiocontextvars 
+anyio
+asgiref 
+asn1crypto 
+attr
+attrs
+board 
+certifi
+chardet
+charset-normalizer 
+click 
+configobj 
+contextlib2 
+contextvars 
+docopt 
+docutils 
+fastapi 
+greenlet
+gruut-ipa 
+gunicorn 
+h11 
+httptools 
+idna 
+immutables 
+importlib-metadata 
+importlib-resources 
+Jinja2 >= 
+jmespath 
+numpy-camera 
+opencv-camera 
+opencv-python 
+packaging 
+pafy 
+Pillow-PIL 
+pip 
+pycrypto 
+pydantic
+pygame 
+pyparsing 
+python-apt
+python-dateutil 
+python-dotenv 
+python-vlc 
+pytz 
+pyxdg 
+PyYAML
+# external ai requests
+replicate
+# 
+requests 
+Rx
+SecretStorage 
+setuptools 
+simple-term-menu 
+simplejson 
+six 
+slurm 
+SQLAlchemy 
+tqdm 
 typing >= 3.7.4.3
 typing-extensions >= 4.1.1
 urllib3 >= 1.26.9
