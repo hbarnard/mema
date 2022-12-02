@@ -10,7 +10,7 @@ from io import BytesIO
 
 # get rid of one of these too, keep subprocess if possible
 import subprocess
-from plumbum import FG, BG, local
+#from plumbum import FG, BG, local
 import threading as th
 
 import datetime
