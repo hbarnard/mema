@@ -1,0 +1,33 @@
+off 'O_B f_E
+on 'A_B n_E
+garage g_B 3_I 'A_I Z_E
+blue b_B l_I 'u_E
+make m_B 'e_I I_I k_E
+open 'o_B U_I p_I V_I n_E
+<sil> SIL_S
+cold k_B 'o_I U_I l_I d_E
+living l_B 'I_I v_I I_I N_E
+turn t_B '3_I n_E
+what w_B 'V_I t_E
+room r_B 'u_I m_E
+<unk> SPN_S
+light l_B 'aI_I t_E
+it 'I_B t_E
+closed k_B l_I 'o_I U_I z_I d_E
+green g_B r_I 'i_I n_E
+tell t_B 'E_I l_E
+the D_B V_E
+me m_B 'i_E
+to t_B 'u_E
+whats w_B V_I ts_E
+red r_B 'E_I d_E
+set s_B 'E_I t_E
+temperature t_B 'E_I m_I p_I r_I V_I tS_I 3_E
+lamp l_B '{_I m_I p_E
+how h_B 'aU_E
+is 'I_B z_E
+door d_B 'O_I r_E
+bedroom b_B 'E_I d_I r_I u_I m_E
+hot h_B 'A_I t_E
+time t_B 'aI_I m_E
+<eps> SIL

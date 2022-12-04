@@ -1,0 +1,32 @@
+off 1.0	'O f
+on 1.0	'A n
+garage 1.0	g 3 'A Z
+blue 1.0	b l 'u
+make 1.0	m 'e I k
+open 1.0	'o U p V n
+<sil> 1.0	SIL
+cold 1.0	k 'o U l d
+living 1.0	l 'I v I N
+turn 1.0	t '3 n
+what 1.0	w 'V t
+room 1.0	r 'u m
+<unk> 1.0	SPN
+light 1.0	l 'aI t
+it 1.0	'I t
+closed 1.0	k l 'o U z d
+green 1.0	g r 'i n
+tell 1.0	t 'E l
+the 1.0	D V
+me 1.0	m 'i
+to 1.0	t 'u
+whats 1.0	w V ts
+red 1.0	r 'E d
+set 1.0	s 'E t
+temperature 1.0	t 'E m p r V tS 3
+lamp 1.0	l '{ m p
+how 1.0	h 'aU
+is 1.0	'I z
+door 1.0	d 'O r
+bedroom 1.0	b 'E d r u m
+hot 1.0	h 'A t
+time 1.0	t 'aI m

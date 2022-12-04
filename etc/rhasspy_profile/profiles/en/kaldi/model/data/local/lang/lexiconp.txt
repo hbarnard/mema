@@ -1,0 +1,32 @@
+off 1.0 'O_B f_E
+on 1.0 'A_B n_E
+garage 1.0 g_B 3_I 'A_I Z_E
+blue 1.0 b_B l_I 'u_E
+make 1.0 m_B 'e_I I_I k_E
+open 1.0 'o_B U_I p_I V_I n_E
+<sil> 1.0 SIL_S
+cold 1.0 k_B 'o_I U_I l_I d_E
+living 1.0 l_B 'I_I v_I I_I N_E
+turn 1.0 t_B '3_I n_E
+what 1.0 w_B 'V_I t_E
+room 1.0 r_B 'u_I m_E
+<unk> 1.0 SPN_S
+light 1.0 l_B 'aI_I t_E
+it 1.0 'I_B t_E
+closed 1.0 k_B l_I 'o_I U_I z_I d_E
+green 1.0 g_B r_I 'i_I n_E
+tell 1.0 t_B 'E_I l_E
+the 1.0 D_B V_E
+me 1.0 m_B 'i_E
+to 1.0 t_B 'u_E
+whats 1.0 w_B V_I ts_E
+red 1.0 r_B 'E_I d_E
+set 1.0 s_B 'E_I t_E
+temperature 1.0 t_B 'E_I m_I p_I r_I V_I tS_I 3_E
+lamp 1.0 l_B '{_I m_I p_E
+how 1.0 h_B 'aU_E
+is 1.0 'I_B z_E
+door 1.0 d_B 'O_I r_E
+bedroom 1.0 b_B 'E_I d_I r_I u_I m_E
+hot 1.0 h_B 'A_I t_E
+time 1.0 t_B 'aI_I m_E

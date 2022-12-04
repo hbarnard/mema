@@ -1,0 +1,32 @@
+off 'O f
+on 'A n
+garage g 3 'A Z
+blue b l 'u
+make m 'e I k
+open 'o U p V n
+<sil> SIL
+cold k 'o U l d
+living l 'I v I N
+turn t '3 n
+what w 'V t
+room r 'u m
+<unk> SPN
+light l 'aI t
+it 'I t
+closed k l 'o U z d
+green g r 'i n
+tell t 'E l
+the D V
+me m 'i
+to t 'u
+whats w V ts
+red r 'E d
+set s 'E t
+temperature t 'E m p r V tS 3
+lamp l '{ m p
+how h 'aU
+is 'I z
+door d 'O r
+bedroom b 'E d r u m
+hot h 'A t
+time t 'aI m

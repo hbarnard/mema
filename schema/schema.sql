@@ -24,5 +24,3 @@ CREATE TABLE IF NOT EXISTS 'text_search_content'(id INTEGER PRIMARY KEY, c0, c1)
 CREATE TABLE IF NOT EXISTS 'text_search_docsize'(id INTEGER PRIMARY KEY, sz BLOB);
 CREATE TABLE IF NOT EXISTS 'text_search_config'(k PRIMARY KEY, v) WITHOUT ROWID;
 
-
-create virtual table text_search using fts5(memory_id,free_text) ;

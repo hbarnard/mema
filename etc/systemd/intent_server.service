@@ -4,15 +4,15 @@ Description=Intent Server for Mema: Executes Known Voice Commands
 After=network.target
 
 [Service]
-User=hbarnard
-Group=users
+#User=hbarnard
+#Group=users
 PermissionsStartOnly = true
 PIDFile=/run/mema/intent_server.pid
 WorkingDirectory=/usr/share/pyshared/mema
 Environment=REPLICATE_API_TOKEN=
 ExecStartPre = /bin/mkdir /run/mema
 
-ExecStart=/bin/sh -c "cd /home/hbarnard/projects/mema && /usr/local/bin/gunicorn -k uvicorn.workers.UvicornWorker intent_server:app -b 0.0.0.0:8000 --pid /run/mema/intent_server.pid"
+ExecStart=/bin/sh -c "cd /home/pi/mema && /usr/local/bin/gunicorn -k uvicorn.workers.UvicornWorker intent_server:app -b 0.0.0.0:8000 --pid /run/mema/intent_server.pid"
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 ExecStopPost=/bin/rmdir /run/mema/
