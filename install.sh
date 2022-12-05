@@ -29,6 +29,8 @@ apt install python3-pycurl
 apt install python3-matplotlib python3-tk
 apt install mosquitto mosquitto-dev
 apt install sqlite3
+# may or may not need this for sample conversion
+apt install ffmpeg
 sudo apt install docker.io
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing mema3'

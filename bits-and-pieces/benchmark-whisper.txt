@@ -1,0 +1,71 @@
+./main samples/gb1.wav
+whisper_model_load: loading model from 'models/ggml-base.en.bin'
+whisper_model_load: n_vocab       = 51864
+whisper_model_load: n_audio_ctx   = 1500
+whisper_model_load: n_audio_state = 512
+whisper_model_load: n_audio_head  = 8
+whisper_model_load: n_audio_layer = 6
+whisper_model_load: n_text_ctx    = 448
+whisper_model_load: n_text_state  = 512
+whisper_model_load: n_text_head   = 8
+whisper_model_load: n_text_layer  = 6
+whisper_model_load: n_mels        = 80
+whisper_model_load: f16           = 1
+whisper_model_load: type          = 2
+whisper_model_load: adding 1607 extra tokens
+whisper_model_load: mem_required  =  506.00 MB
+whisper_model_load: ggml ctx size =  140.60 MB
+whisper_model_load: memory size   =   22.83 MB
+whisper_model_load: model size    =  140.54 MB
+
+system_info: n_threads = 4 / 4 | AVX = 0 | AVX2 = 0 | AVX512 = 0 | NEON = 1 | FP16_VA = 0 | WASM_SIMD = 0 | BLAS = 0 | 
+
+main: processing 'samples/gb1.wav' (3179927 samples, 198.7 sec), 4 threads, 1 processors, lang = en, task = transcribe, timestamps = 1 ...
+
+
+[00:00:00.000 --> 00:00:09.640]   My fellow Americans, this day has brought terrible news and great sadness to our country.
+[00:00:09.640 --> 00:00:15.920]   At nine o'clock this morning, Mission Control in Houston lost contact with our Space Shuttle
+[00:00:15.920 --> 00:00:17.440]   Columbia.
+[00:00:17.440 --> 00:00:24.640]   A short time later, debris was seen falling from the skies above Texas.
+[00:00:24.640 --> 00:00:27.200]   The Columbia's lost.
+[00:00:27.200 --> 00:00:29.880]   There are no survivors.
+[00:00:29.880 --> 00:00:32.920]   One board was a crew of seven.
+[00:00:32.920 --> 00:00:40.080]   Colonel Rick Husband, Lieutenant Colonel Michael Anderson, Commander Laurel Clark, Captain David
+[00:00:40.080 --> 00:00:50.520]   Brown, Commander William McCool, Dr. Kultna Shavla, and Elon Ramon, a colonel in the Israeli
+[00:00:50.520 --> 00:00:52.800]   Air Force.
+[00:00:52.800 --> 00:00:57.440]   These men and women assumed great risk in the service to all humanity.
+[00:00:57.440 --> 00:01:04.120]   In an age when spaceflight has come to seem almost routine, it is easy to overlook the
+[00:01:04.120 --> 00:01:10.400]   dangers of travel by rocket and the difficulties of navigating the fierce outer atmosphere of
+[00:01:10.400 --> 00:01:12.600]   the Earth.
+[00:01:12.600 --> 00:01:19.280]   These astronauts knew the dangers, and they faced them willingly, knowing they had a high
+[00:01:19.280 --> 00:01:22.960]   and noble purpose in life.
+[00:01:22.960 --> 00:01:30.720]   Because of their courage and daring and idealism, we will miss them all the more.
+[00:01:30.720 --> 00:01:36.520]   All Americans today are thinking as well of the families of these men and women who have
+[00:01:36.520 --> 00:01:40.400]   been given this sudden shock in grief.
+[00:01:40.400 --> 00:01:42.280]   You're not alone.
+[00:01:42.280 --> 00:01:48.320]   Our entire nation agrees with you, and those you loved will always have the respect and
+[00:01:48.320 --> 00:01:52.280]   gratitude of this country.
+[00:01:52.280 --> 00:01:56.520]   The cause in which they died will continue.
+[00:01:56.520 --> 00:02:04.120]   Mankind has led into the darkness beyond our world by the inspiration of discovery and
+[00:02:04.120 --> 00:02:07.000]   the longing to understand.
+[00:02:07.000 --> 00:02:11.120]   Our journey into space will go on.
+[00:02:11.120 --> 00:02:16.440]   In the skies today, we saw destruction and tragedy.
+[00:02:16.440 --> 00:02:22.040]   As farther than we can see, there is comfort and hope.
+[00:02:22.040 --> 00:02:29.760]   In the words of the prophet Isaiah, "Lift your eyes and look to the heavens who created
+[00:02:29.760 --> 00:02:39.280]   all these, he who brings out the starry hosts one by one and calls them each by name."
+[00:02:39.280 --> 00:02:46.400]   Because of his great power and mighty strength, not one of them is missing.
+[00:02:46.400 --> 00:02:53.720]   The same creator who names the stars also knows the names of the seven souls we mourn
+[00:02:53.720 --> 00:02:55.560]   today.
+[00:02:55.560 --> 00:03:03.240]   The crew of the shuttle Columbia did not return safely to Earth yet we can pray that all are
+[00:03:03.240 --> 00:03:05.840]   safely home.
+[00:03:05.840 --> 00:03:12.640]   May God bless the grieving families and may God continue to bless America.
+[00:03:12.640 --> 00:03:22.640]   [BLANK_AUDIO]
+
+
+whisper_print_timings:     load time =  1058.80 ms
+whisper_print_timings:      mel time =  4680.40 ms
+whisper_print_timings:   sample time =   483.10 ms
+whisper_print_timings:   encode time = 195740.19 ms / 32623.37 ms per layer
+whisper_print_timings:   decode time = 57331.04 ms / 9555.17 ms per layer
+whisper_print_timings:    total time = 259338.50 ms
+pi@mema3:~/whisper.cpp $ ./main -h
