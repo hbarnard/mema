@@ -14,15 +14,16 @@ echo  '*------------------------------------------------------------------------
 echo 'making media directories'
 echo  '*-------------------------------------------------------------------------------*'
 
-mkdir static/media/mos
-mkdir static/media/tmp
-mkdir static/media/rec
-mkdir static/media/vid
-mkdir static/media/pic
+mkdir -p static/media/mos
+mkdir -p static/media/tmp
+mkdir -p static/media/rec
+mkdir -p static/media/vid
+mkdir -p static/media/pic
 
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing packages'
 echo  '*-------------------------------------------------------------------------------*'
+# may not need some of these
 apt install python3-pip
 apt install python3-numpy
 apt install python3-pycurl
@@ -30,14 +31,23 @@ apt install python3-matplotlib python3-tk
 apt install mosquitto mosquitto-dev
 apt install sqlite3
 apt install cmake
-# may or may not need this for sample conversion
+# this is to enable the xdg-open replacement jaro
+apt-get install guile-2.2
+# audiovisual section
 apt install ffmpeg
+apt install libcamera-apps
+apt install pulseaudio
+apt install vlc
+# docker
 sudo apt install docker.io
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing mema3'
 echo 'install python3 packages, make take a while'
 echo  '*-------------------------------------------------------------------------------*'
 sudo -H pip install -r  requirements.txt
+#FIXME: voice bonnet stuff: not happy about this, does tons of 'other stuff' as well!
+wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/raspi-blinka.py
+sudo python3 raspi-blinka.py
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing intent server service'
 cp etc/systemd/intent_server.service /etc/systemd/system/

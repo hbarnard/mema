@@ -4,14 +4,12 @@ import os, pwd
 
 # for system health, but pycurl should be used elsewhere
 # get rid of one of these, pycurl_request is probably problematic
-import pycurl
+
 #FIXME: this is problematic: import pycurl_requests as req
-from io import BytesIO
+
 
 # get rid of one of these too, keep subprocess if possible
 import subprocess
-#from plumbum import FG, BG, local
-import threading as th
 
 import datetime
 from pathlib import Path
@@ -20,7 +18,8 @@ import webbrowser
 
 from fastapi import UploadFile, File, Form
 from fastapi import APIRouter, Query, HTTPException
-from fastapi.templating import Jinja2Templates
+#from fastapi.templating import Jinja2Templates
+from starlette.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,135 +27,40 @@ from fastapi import FastAPI, WebSocket
 
 import re
 
+import memalib.mema_utility as mu
+
 #FIXME: currently this is a hard install, look at https://github.com/amueller/word_cloud and stackoverflow for help
 from wordcloud import WordCloud
-
 import sqlite3
-import configparser
+import logging
 
-#FIXME: ConfigObj needs to be used everywhere
 from configobj import ConfigObj
 
-class run_subprocess(th.Thread):
-    def __init__(self,command):
-        self.stdout = None
-        self.stderr = None
-        th.Thread.__init__(self)
-        self.command = command
-
-    def run(self):
-        p = subprocess.call(self.command, shell=True)
-        #self.stdout, self.stderr = p.communicate()
- 
-#FIXME: Probably don't need this?
-    
-def demote(user_uid, user_gid):
-    def result():
-        os.setgid(user_gid)
-        os.setuid(user_uid)
-    return result                
-
-
-#FIXME: Need this for xdg-open, maybe theres another simpler way?
-# see also: https://stackoverflow.com/questions/61302291/python-subprocess-popen-execute-as-different-user v, similar
-        
-def exec_cmd(username,command):
-    # get user info from username
-    pw_record = pwd.getpwnam(username)
-    homedir = pw_record.pw_dir
-    user_uid = pw_record.pw_uid
-    user_gid = pw_record.pw_gid
-    env = os.environ.copy()
-    env.update({'HOME': homedir, 'LOGNAME': username, 'PWD': os.getcwd(), 'FOO': 'bar', 'USER': username})
-
-    # execute the command
-    proc = subprocess.Popen([command],
-                              shell=True,
-                              env=env,
-                              preexec_fn=demote(user_uid, user_gid),
-                              stdout=subprocess.PIPE)
-    return
-
-
-#FIXME: spoken prompts without going back into node red
-# two formats used for speech and rhasspy api can be used directly, this is a bodge
-def curl_speak(phrase):
-    cl = '''curl -s --header "Content-Type: text/utf-8"   --request POST  --data '{speech}'   http://localhost:12101/api/text-to-speech > /dev/null'''.format(speech = phrase)
-    cl_array = cl.split()
-    subprocess.call(cl_array,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
-    return
-
-#FIXME: this needs to be elsewhere but 'for the moment'
-
-def system_health():
-
-    buffer = BytesIO()
-    c = pycurl.Curl()
-    c.setopt(c.WRITEDATA, buffer)
-    c.setopt(pycurl.FAILONERROR, 0)
-
-    # don't test the intent server, used for this display!
-    mema_servers = {
-        'rhasspy'  :  config['main']['rhasspy_main'],
-        'mimic3'   :  config['main']['mimic3'],
-        'node_red' :  config['main']['node_red']
-    }
-
-    mema_health = {}
-    for name,url  in mema_servers.items():
-        try:
-            c.setopt(c.URL, url)
-            c.perform()
-            if (c.getinfo(c.RESPONSE_CODE) == 200):
-                mema_health[name] = 'dotgreen'
-            else:
-                mema_health[name] = 'dotred'
-        except:
-            mema_health[name] = 'dotred'
-    c.close()
-    
-    # test whether wifi is up
-    text_string = Path('/proc/net/wireless').read_text()
-    m = re.match(r"wlp2s0", text_string)
-    if m:
-        mema_health['wifi'] = 'dotgreen'
-    else:
-        mema_health['wifi'] = 'dotred'
-    return mema_health
-
-def timer_function():  
-   print("timed out \n")  
-
 config = ConfigObj('etc/mema.ini')
-#config.read('etc/mema.ini')
+logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
+
+
 
 con = sqlite3.connect(config['main']['db'], check_same_thread=False)
-
 app = FastAPI(debug=True)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/media", StaticFiles(directory="static/media", html=True), name="media")   
 
-
 BASE_PATH = Path(__file__).resolve().parent
-TEMPLATES = Jinja2Templates(directory=str(BASE_PATH / "templates"))
+templates = Jinja2Templates(directory="templates/en")
 
 api_router = APIRouter()
 
+#FIXME: Problems with xdg-open
 os.environ["DISPLAY"] = ":0.0"
 
-# convenience for separating Pi and a random laptop
-pi = False
-if os.uname()[4].startswith("arm"): 
-    pi = True 
+pi  = False 
+# no test on system name now, unreliable    
+if config['main']['pi']: 
+    pi = True
+        
 
-'''
-log_config = uvicorn.config.LOGGING_CONFIG
-log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
-log_config["formatters"]["default"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
-uvicorn.run(app, log_config=log_config)
-uvicorn.run(app, host="0.0.0.0", port=8000, log_config=log_config)
-'''
 
 @app.post("/")
 async def info(info : Request):
@@ -184,7 +88,7 @@ async def info(info : Request):
             "status" : "FAIL"
         }
         
-    print(req_info) if config['main']['debug'] else None  
+    #logging.debug(req_info)  
       
     # one or two, such as redirects can't be handled in the intent table
     if intent == "GetStory" and (number[0] in number):
@@ -193,11 +97,10 @@ async def info(info : Request):
         return RedirectResponse(url)    
     
     # intents are the options see: https://stackoverflow.com/questions/17881409/whats-an-alternative-to-if-elif-statements-in-python
-
- 
     intents = {
 
         'TakePhoto'      : run_photo_command,
+      #  'GetTime'        : run_time_command,
      #  'TellStory'      : print("tell story found"),   
     #   'Associate'      : print("associate photo and story found"),
         'RecordStory'    : run_record_command,
@@ -216,29 +119,27 @@ async def info(info : Request):
     else:
         curl_speak(config['en_prompts']['nope'])
 
-    print("command done") if config['main']['debug'] else None
+    logging.debug('is when this event was logged.')
     
+    #FIXME: Not quite sure what purpose this serves?     
     return {
         "status" : "SUCCESS",
         "data" : req_info
     }
-
-
-def notAfun():
-  print ("not a valid function name")
-
 
 # take a photo and store it
             
 def run_photo_command(number,please):
     
     print("take photo found") if config['main']['debug'] else None
+    
     #command = config['main']['xdg_open_command'] + '?type=thinking'
     #xdg_open_array = command.split()
     # subprocess.call(xdg_open_array, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     cur = con.cursor()
-    picture = local[config['main']['picture_program']]
+    # picture = local[config['main']['picture_program']]
+    picture = subprocess.check_output(config['main']['picture_program'])
     result = picture()
     (text, file_path) = result.split('|')
     file_path.rstrip()
@@ -308,25 +209,24 @@ def run_kill_video_command(number,please):
 
 
 # shares code with transcribe and needs external AI, at present
-
-# label video in database
+# FIXME: label anything in database, extend this
    
 def run_label_video_command(number,please):
     
-    print("label video found") if config['main']['debug'] else None
+    logging.debug("label video found " + str(number[0]))
+    
     cur = con.cursor()
-    result = cur.execute("SELECT * FROM memories WHERE memory_id=?",(video_number))
+    result = cur.execute("SELECT * FROM memories WHERE memory_id=?",(number[0]))
     fields = result.fetchone()
     if fields is not None:
-        if (fields[7] != 'video'):
+        if (fields[7] != 'video'):  # FIXME: label video and photos
             curl_speak(config['en_prompts']['not_video'])
             return
         else:
-            result = subprocess.run([config['main']['label_program']],  stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
-            #print(result)
+            result = subprocess.run([config['main']['label_program'], number[0] ],  stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
             (text, file_path) = result.split('|')
             if (text != 'empty'):
-                cur.execute("update memories set description = ? WHERE memory_id=?",(text, video_number[0]))
+                cur.execute("update memories set description = ? WHERE memory_id=?",(text, number[0]))
                 con.commit()
             else:
                 curl_speak(config['en_prompts']['didnt_get'])
@@ -336,7 +236,7 @@ def run_label_video_command(number,please):
     return
 
 
-#FIXME: to be done
+#FIXME: to be done, associate n with m?
     
 def run_associate_command(number,please):
     print("running classifier") if config['main']['debug'] else None
@@ -386,16 +286,16 @@ async def get_wordcloud():
 # list of memories to screen    
 
 @app.get("/memories.html")
-def fetch_all(request: Request):
+def fetch_all(request: Request, response_class=HTMLResponse ):
     cur = con.cursor()
     # result = cur.execute("SELECT * FROM memories")
     result = cur.execute("select memory_id, description, file_path, strftime('%d-%m-%Y %H:%M', unix_time, 'unixepoch') as date, public, type from memories")
     results = result.fetchall()
     cur.close()
     #wordcloud() not here, in a cron
-    return TEMPLATES.TemplateResponse(
+    return templates.TemplateResponse(
         "list.html",
-        {"request": request, "results" :results, "mema_health": system_health()}
+        {"request": request, "results" :results, "mema_health": mu.system_health()}
     )
 
 

@@ -55,7 +55,10 @@ tr:nth-child(even) {
 <img src="/{{field[3]}}" />
 
 {% elif field[7] == 'video': %}
-
+<video width="320" height="240" controls>
+  <source src="/{{field[3]}}" /> type="video/mp4">
+Your browser does not support the video tag.
+</video>
 
 
 {% endif %}

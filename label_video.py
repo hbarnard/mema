@@ -9,45 +9,27 @@ import subprocess
 import requests
 import datetime
 from pathlib import Path
-
+import logging
 import replicate
-
-import configparser
-
+import sys
+from configobj import ConfigObj
+import memalib.mema_utility
 from digitalio import DigitalInOut, Direction, Pull
 
 # coloured LEDS on front of voice bonnet, for primitive feedback
 import adafruit_dotstar
+from configobj import ConfigObj
 
-
-'''
-Maybe later? these are the button controls
-
-button = DigitalInOut(board.D17)
-button.direction = Direction.INPUT
-button.pull = Pull.UP
-'''
-# small spoken prompts without going back into node red
-# use pycurl later
-
-def curl_speak(phrase):
-
-    cl = '''curl -s --header "Content-Type: text/utf-8"   --request POST  --data '{speech}'   http://localhost:12101/api/text-to-speech'''.format(speech = phrase)
-    cl_array = cl.split()
-    #print(cl_array)
-    subprocess.run(cl_array, check=True, capture_output=True).stdout
-    return
-
-# main script, need to adjust the sleep times!
+#FIXME: need to adjust the sleep times and recording length!
 
 def main():
 
     DOTSTAR_DATA = board.D5
     DOTSTAR_CLOCK = board.D6
     dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
-
-    config = configparser.ConfigParser()
-    config.read('etc/mema.ini')
+    
+    config = ConfigObj('etc/mema.ini')
+    logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
 
     phrase = config['en_prompts']['start_record'].replace(' ','_')
     curl_speak(phrase)
@@ -55,14 +37,9 @@ def main():
     #feedback before stopping rhasspy
     dots[2] = (0,0,255)  # red
 
-    try:
-        subprocess.run(["docker", "stop", "rhasspy"], check=True, capture_output=True, text=True).stdout
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-
     # make a file name from the current unix timestamp
-    unix_time = int(datetime.datetime.now().timestamp())
-    file_path = config['main']['media_directory'] + "tmp/" + str(unix_time) + ".wav" 
+    unix_time = docker_control('stop', 'mema_rhasspy')
+    file_path = config['main']['media_directory'] + "tmp/" + str(unix_time) + sys.argv[1] + ".wav" 
 
     sleep(10)
     dots[2] = (255,0,0)  # green
@@ -70,38 +47,30 @@ def main():
     try:
         record_command = config['main']['record_command'] + ' ' + file_path
         record_array = record_command.split()
-        #print(' '.join(record_array))
         subprocess.run(record_array, check=True, capture_output=True, text=True).stdout
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return here with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
     dots[2] = (0,0,255)  # red
 
-    try:
-        subprocess.run(["docker", "start", "rhasspy"], check=True, capture_output=True, text=True).stdout
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-
-    sleep(10)  # give rhasspy time to reload!
-
-    phrase =  config['en_prompts']['end_record'].replace(' ','_')
-    curl_speak(phrase)
-
-    # select speech to text model
-    model = replicate.models.get("openai/whisper")
-    # format file as path object (openai needs this)
-    audio_file = Path(file_path)
+    unix_time = docker_control('start', 'mema_rhasspy')
+    sleep(config['main']['rhasspy_reload'])
+    curl_speak(config['en_prompts']['end_record'])
 
     # give a little feedback
     dots[2] = (0,255,0)  # blue
-
-    # speech to text on remote server
-    # signal transacription empty if something goes wrong
+    
     result = {"transcription" : "empty"}
-    result = model.predict(audio=audio_file)
-
-    phrase = config['en_prompts']['end_transcription'].replace(' ','_')
-    curl_speak(phrase)
+    #FIXME: 12/12/2022 replace with internal whisper, real-soon
+    if config['main']['use_external_ai']:
+        # select speech to text model
+        model = replicate.models.get("openai/whisper")
+        audio_file = Path(file_path)
+        result = model.predict(audio=audio_file)
+        text = result['transcription'] 
+        curl_speak(config['en_prompts']['end_transcription'])
+    else:        
+        curl_speak(config['en_prompts']['done'])
 
     # done, feedback, stop blinking lights
     dots[2] = (255,0,0)  # green

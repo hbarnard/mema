@@ -7,93 +7,61 @@ import subprocess
 import datetime
 from pathlib import Path
 import os
-from plumbum import local, FG, BG
-
+import re
+import memalib.mema_utility as mu
 import replicate
-
-import configparser
-
-# convenience for separating Pi and a random laptop
-pi = False
-if os.uname()[4].startswith("arm"): 
-    pi = True 
-
-if pi:
-    import board
-    from picamera import PiCamera
-    # coloured LEDS on front of voice bonnet, for primitive feedback
-    from digitalio import DigitalInOut, Direction, Pull
-    import adafruit_dotstar
-    DOTSTAR_DATA = board.D5
-    DOTSTAR_CLOCK = board.D6
-    dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
-
-
-# spoken prompts without going back into node red
-
-def curl_speak(phrase):
-    cl = '''curl -s --header "Content-Type: text/utf-8"   --request POST  --data '{speech}'   http://localhost:12101/api/text-to-speech > /dev/null'''.format(speech = phrase)
-    cl_array = cl.split()
-    subprocess.call(cl_array,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
-    return
-
+from configobj import ConfigObj
+import logging
 
 # main script
 def main():
 
-    config = configparser.ConfigParser()
-    config.read('etc/mema.ini')
+    config = ConfigObj('etc/mema.ini')
+    logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
+    
+    pi  = False 
+    # no test on system name now, unreliable    
+    if config['main']['pi']: 
+        pi = True 
+        import board
+        # coloured LEDS on front of voice bonnet, for primitive feedback
+        from digitalio import DigitalInOut, Direction, Pull
+        import adafruit_dotstar
+        DOTSTAR_DATA = board.D5
+        DOTSTAR_CLOCK = board.D6
+        dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
 
-    phrase = config['en_prompts']['start_record'].replace(' ','_')
-    curl_speak(phrase)
-    sleep(1)
-
-    try:
-        subprocess.run(["docker", "stop", "mema_rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-
-    # make a file name from the current unix timestamp
-    unix_time = int(datetime.datetime.now().timestamp())
+    mu.curl_speak(config['en_prompts']['start_record'])    
+    unix_time = mu.docker_control('stop', 'mema_rhasspy')
     file_name = str(unix_time) + ".wav" 
     
     file_path = config['main']['media_directory'] + "rec/" + file_name
     media_path = config['main']['media_directory_url'] + "rec/" + file_name
-
-    sleep(1)
-    if pi:
-        dots[0] = (255,0,0)  # green
+    
+    dots[0] = (255,0,0) if pi else None
 
     try:
-        record_command = config['main']['record_command'] + ' ' + file_path
-        record_array = record_command.split()
-        subprocess.call(record_array, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        #FIXME: this all goes wrong because of the comma -D Hw3,0 for example: see: https://github.com/shivammathur/setup-php/issues/392
+        record_command = config['main']['record_command'] + ' ' + config['main']['audio_maximum'] + ' ' + file_path
+        #record_array = record_command.split()
+        logging.debug('record command is: ' + record_command)
+        subprocess.call(record_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return here with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
-    if pi:
-        dots[0] = (0,0,255)  # red
+    dots[0] = (0,0,255)  if pi else None  # red
 
-    try:
-        subprocess.run(["docker", "start", "mema_rhasspy"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-
-    sleep(5)  # give mema_rhasspy time to reload!
-
-    phrase =  config['en_prompts']['end_record'].replace(' ','_')
-    curl_speak(phrase)
-
-
+    unix_time = mu.docker_control('start', 'mema_rhasspy')
+    sleep(int(config['main']['rhasspy_reload']))  # give mema_rhasspy time to reload!
+    
+    mu.curl_speak(config['en_prompts']['end_record'])
 
     # give a little feedback
-    if pi:
-        dots[0] = (0,255,0)  # blue
-
-    # probably in configuration later
-    text = 'no label'
+    dots[0] = (0,255,0)  if pi else None
+    
+    text = config['en_literals']['unlabelled_audio']
    
-    # speech to text on remote server
+    #FIXME speech to text on remote server, replace with whisper.cpp cron
     if config['main']['use_external_ai']:
         # select speech to text model
         model = replicate.models.get("openai/whisper")
@@ -101,10 +69,9 @@ def main():
         audio_file = Path(file_path)
         result = model.predict(audio=audio_file)
         text = result['transcription'] 
-        phrase = config['en_prompts']['end_transcription'].replace(' ','_')
-    else:        
-        phrase = config['en_prompts']['done']
-        curl_speak(phrase)
+        mu.curl_speak(config['en_prompts']['end_transcription'])
+        
+    mu.curl_speak(config['en_prompts']['done'])
 
     # done, feedback, stop blinking lights
     if pi:

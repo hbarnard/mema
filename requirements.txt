@@ -1,3 +1,5 @@
+adafruit-python-shell
+adafruit-circuitpython-dotstar
 aiocontextvars 
 anyio
 asgiref 
@@ -14,6 +16,7 @@ contextlib2
 contextvars 
 docopt 
 docutils 
+digitalio
 fastapi 
 greenlet
 gruut-ipa 
@@ -31,13 +34,14 @@ opencv-camera
 opencv-python 
 packaging 
 pafy 
+picamera
 Pillow-PIL 
 pip 
 pycrypto 
 pydantic
 pygame 
 pyparsing 
-python-apt
+#python-apt
 python-dateutil 
 python-dotenv 
 python-vlc 
