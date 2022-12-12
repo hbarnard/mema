@@ -2,3 +2,5 @@ static/media/rec/*
 static/media/tmp/*
 static/media/vid/*
 static/media/pic/*
+*.log
+
