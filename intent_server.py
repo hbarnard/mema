@@ -79,7 +79,7 @@ async def info(info : Request):
     
     # confidence level too low or garbled intent
     if not len(intent) or (req_info['asrConfidence'] < float(config['main']['confidence'])) :
-        curl_speak(config['en_prompts']['not_understood'])
+        mu.curl_speak(config['en_prompts']['not_understood'])
         return {
             "status" : "FAIL"
         }
@@ -113,7 +113,7 @@ async def info(info : Request):
     if intent in intents:
         intents[intent](number,polite)
     else:
-        curl_speak(config['en_prompts']['nope'])
+        mu.curl_speak(config['en_prompts']['nope'])
 
     logging.debug('is when this event was logged.')
     
@@ -214,7 +214,7 @@ def run_label_video_command(number,please):
     fields = result.fetchone()
     if fields is not None:
         if (fields[7] != 'video'):  # FIXME: label video and photos
-            curl_speak(config['en_prompts']['not_video'])
+            mu.curl_speak(config['en_prompts']['not_video'])
             return
         else:
             result = subprocess.run([config['main']['label_program'], number[0] ],  stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
@@ -223,9 +223,9 @@ def run_label_video_command(number,please):
                 cur.execute("update memories set description = ? WHERE memory_id=?",(text, number[0]))
                 con.commit()
             else:
-                curl_speak(config['en_prompts']['didnt_get'])
+                mu.curl_speak(config['en_prompts']['didnt_get'])
     else:
-        curl_speak(config['en_prompts']['sorry'])
+        mu.curl_speak(config['en_prompts']['sorry'])
     print(fields)
     return
 
@@ -247,12 +247,12 @@ def run_search_command(number,please):
 
 def run_pie(number,please):
     if please != None:
-        curl_speak(config['en_prompts']['what_kind'])
+        mu.curl_speak(config['en_prompts']['what_kind'])
         Call_URL = "http://localhost:8000/static/pie.html"
         mycmd = r'handlr open  {}'.format(Call_URL)
         subprocess.Popen(mycmd,shell = True) 
     else:
-        curl_speak(config['en_prompts']['nope'])
+        mu.curl_speak(config['en_prompts']['nope'])
         return
 
 #FIXME: Oh boy, what a problem for something v. simple!
@@ -267,7 +267,7 @@ def run_front_page(number,please):
 
 def run_search_memories(number,please):
     print('in search memories')
-    curl_speak('found_a_set_of_memories')
+    mu.curl_speak('found_a_set_of_memories')
     return    
       
 #---------- screen only section
@@ -320,9 +320,9 @@ def fetch_data(id: int):
         lines = fields[0].splitlines()
         text = ' '.join(lines)
         phrase = text.replace(' ','_')
-        curl_speak(phrase)
+        mu.curl_speak(phrase)
     else:
-        curl_speak(config['en_prompts']['sorry'])
+        mu.curl_speak(config['en_prompts']['sorry'])
     return fields
 
 # web socket

@@ -229,7 +229,7 @@
         "id": "b74cbd09c1f1bf1c",
         "type": "mqtt-broker",
         "name": "Raspberry PI",
-        "broker": "10.0.0.76",
+        "broker": "localhost",
         "port": "1883",
         "clientid": "",
         "autoConnect": true,

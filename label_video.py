@@ -37,7 +37,7 @@ def main():
     logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
 
     phrase = config['en_prompts']['start_record'].replace(' ','_')
-    curl_speak(phrase)
+    mu.curl_speak(phrase)
 
     # red: feedback before stopping rhasspy
     dots[0] = (0,0,255) if pi else None
@@ -62,7 +62,7 @@ def main():
 
     unix_time = docker_control('start', 'mema_rhasspy')
     sleep(config['main']['rhasspy_reload'])
-    curl_speak(config['en_prompts']['end_record'])
+    mu.curl_speak(config['en_prompts']['end_record'])
     
     result = {"transcription" : config['en_literals']['unlabelled_video']}
     text = ''
@@ -72,7 +72,7 @@ def main():
         audio_file = Path(file_path)
         result = model.predict(audio=audio_file)
         text = result['transcription'][:30] 
-        curl_speak(config['en_prompts']['end_transcription'])
+        mu.curl_speak(config['en_prompts']['end_transcription'])
     else:   
         #FIXME: this block can go to the library, sooner or later
         transcribe_command = config['main']['transcribe_program'] + ' ' + file_path +  ' > /tmp/transcription'
@@ -81,7 +81,7 @@ def main():
         subprocess.call(transcribe_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         with open('/tmp/transcription') as trans: f = trans.read()
         text = f[:30]     
-        curl_speak(config['en_prompts']['done'])
+        mu.curl_speak(config['en_prompts']['done'])
 
     # green: its done
     dots[0] = (255,0,0) if pi else None
