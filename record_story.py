@@ -20,8 +20,8 @@ def main():
     logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
     
     pi  = False 
-    # no test on system name now, unreliable    
-    if config['main']['pi']: 
+    #FIXME: mema.ini produces strings! also no test on system name now, unreliable    
+    if config['main']['pi'] == 'yes' : 
         pi = True 
         import board
         # coloured LEDS on front of voice bonnet, for primitive feedback
@@ -30,6 +30,7 @@ def main():
         DOTSTAR_DATA = board.D5
         DOTSTAR_CLOCK = board.D6
         dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
+        dots.deinit()
 
     mu.curl_speak(config['en_prompts']['start_record'])    
     unix_time = mu.docker_control('stop', 'mema_rhasspy')
@@ -62,7 +63,8 @@ def main():
     text = config['en_literals']['unlabelled_audio']
    
     #FIXME speech to text on remote server, replace with whisper.cpp cron
-    if config['main']['use_external_ai']:
+    if config['main']['use_external_ai'] == 'yes' :
+        logging.debug('in external AI transcribe')
         # select speech to text model
         model = replicate.models.get("openai/whisper")
         # format file as path object (openai needs this)

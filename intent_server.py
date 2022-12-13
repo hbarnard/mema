@@ -39,8 +39,6 @@ from configobj import ConfigObj
 config = ConfigObj('etc/mema.ini')
 logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
 
-
-
 con = sqlite3.connect(config['main']['db'], check_same_thread=False)
 app = FastAPI(debug=True)
 
@@ -56,12 +54,10 @@ api_router = APIRouter()
 os.environ["DISPLAY"] = ":0.0"
 
 pi  = False 
-# no test on system name now, unreliable    
-if config['main']['pi']: 
+# no test on system name in os now, unreliable, changed from arm to aaarch    
+if config['main']['pi'] == 'yes' : 
     pi = True
         
-
-
 @app.post("/")
 async def info(info : Request):
     
@@ -88,7 +84,7 @@ async def info(info : Request):
             "status" : "FAIL"
         }
         
-    #logging.debug(req_info)  
+    logging.debug(req_info)  
       
     # one or two, such as redirects can't be handled in the intent table
     if intent == "GetStory" and (number[0] in number):
@@ -153,10 +149,8 @@ def run_photo_command(number,please):
     
 def run_record_command(number,please):
     
-    print("record story found") if config['main']['debug'] else None
-    s = th.Timer(30, timer_function) 
-    s.start() 
-     
+    logging.debug('record story found')
+ 
     result = subprocess.check_output(config['main']['story_program'])
     result_string = result.decode('utf-8')
 

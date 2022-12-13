@@ -31,6 +31,8 @@ apt install python3-matplotlib python3-tk
 apt install mosquitto mosquitto-dev
 apt install sqlite3
 apt install cmake
+# makes life simpler for debugging, not in core
+apt install ack
 # this is to enable the xdg-open replacement jaro
 apt-get install guile-2.2
 # audiovisual section

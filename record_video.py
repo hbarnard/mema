@@ -20,8 +20,8 @@ def main():
         
     # convenience for separating Pi and a random laptop
     pi  = False 
-    # no test on system name now 12/12/2022, unreliable    
-    if config['main']['pi']: 
+    #FIXME: mema.ini produces strings! also no test on system name now, unreliable    
+    if config['main']['pi'] == 'yes' : 
         pi = True
 
     if pi:
@@ -32,10 +32,11 @@ def main():
         DOTSTAR_DATA = board.D5
         DOTSTAR_CLOCK = board.D6
         dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
-
+        dots.deinit()
+        
     mu.curl_speak(config['en_prompts']['start_video'])
     
-    #FIXME: Actually no need to do this current, since there's no audio!
+    #FIXME: Actually no need to do this currently, since there's no audio!
     logging.debug('unload docker')
     unix_time = mu.docker_control('stop', 'mema_rhasspy')
     

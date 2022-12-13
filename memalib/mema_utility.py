@@ -73,6 +73,8 @@ def docker_control(command,instance_name):
     return int(datetime.datetime.now().timestamp())
 
 
+#FIXME: not used current, but useful
+
 def system_health():
 
     buffer = BytesIO()

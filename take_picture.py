@@ -15,8 +15,8 @@ import logging
 config = ConfigObj('etc/mema.ini')
 
 pi  = False 
-# no test on system name now, unreliable    
-if config['main']['pi']: 
+#FIXME: mema.ini produces strings! also no test on system name now, unreliable
+if config['main']['pi'] == 'yes' : 
     pi = True     
 
 if pi:
@@ -35,6 +35,7 @@ def main():
         DOTSTAR_DATA = board.D5
         DOTSTAR_CLOCK = board.D6
         dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
+        dots.deinit()
         
     config = ConfigObj('etc/mema.ini')
     logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
@@ -73,7 +74,7 @@ def main():
                     
     result = config['en_literals']['unlabelled_picture']
     
-    if config['main']['use_external_ai']:
+    if config['main']['use_external_ai']  == 'yes':
         mu.curl_speak(config['en_prompts']['trying_caption'])
         model = replicate.models.get("j-min/clip-caption-reward")
         result = model.predict(image=image_file)
