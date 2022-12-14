@@ -78,6 +78,9 @@ def main():
         model = replicate.models.get("j-min/clip-caption-reward")
         result = model.predict(image=image_file)
         mu.curl_speak(config['en_prompts']['done'])
+    else:
+        mu.curl_speak(config['en_prompts']['done'])
+
 
     dots.deinit() if pi else None
     print(result  + "|" + media_path)

@@ -115,13 +115,15 @@ async def info(info : Request):
     else:
         mu.curl_speak(config['en_prompts']['nope'])
 
-    logging.debug('is when this event was logged.')
+    logging.debug('--->is when this event was logged.')
     
     #FIXME: Not quite sure what purpose this serves?     
     return {
         "status" : "SUCCESS",
         "data" : req_info
     }
+    
+    logging.debug('<---is when this event returns.')
 
 # take a photo and store it
             
@@ -129,17 +131,18 @@ def run_photo_command(number,please):
     
     print("take photo found") if config['main']['debug'] else None
     
+    # FIXME: nice to have websocket notification
     #command = config['main']['xdg_open_command'] + '?type=thinking'
     #xdg_open_array = command.split()
     # subprocess.call(xdg_open_array, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     cur = con.cursor()
     # picture = local[config['main']['picture_program']]
-    picture = subprocess.check_output(config['main']['picture_program'])
-    print('picture is: ' + picture.decode("utf-8"))
-    result = picture()
-    (text, file_path) = result.split('|')
-    file_path.rstrip()
+    result = subprocess.check_output(config['main']['picture_program'])
+    print(result.decode()) 
+    res = result.decode()
+    [text, file_path] = res.split("|")
+    #file_path.rstrip()
     unix_time = int(datetime.datetime.now().timestamp())
     cur.execute("INSERT INTO memories (description, text, file_path, unix_time, public, owner, type) values (?, ?,?, ?, ?, ?,? )", (text, text, file_path, unix_time, 0, 1, 'photo'))
     con.commit()
