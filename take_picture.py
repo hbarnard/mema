@@ -60,6 +60,7 @@ def main():
         try:
             subprocess.call(picture_command_array, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError as e:
+            logging.debug('taking picture error')
             raise RuntimeError("command '{}' return here with error (code {}): {}".format(e.cmd, e.returncode, e.output))
         dots[0] = (0,255,0)  # red
     else:
@@ -81,7 +82,7 @@ def main():
     else:
         mu.curl_speak(config['en_prompts']['done'])
 
-
+    logging.debug('end of taking picture')
     dots.deinit() if pi else None
     print(result  + "|" + media_path)
 

@@ -40,8 +40,9 @@ apt install ffmpeg
 apt install libcamera-apps
 apt install pulseaudio
 apt install vlc
+apt install ntp
 # docker
-sudo apt install docker.io
+# no get_docker instead sudo apt install docker.io
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing mema3'
 echo 'install python3 packages, make take a while'
