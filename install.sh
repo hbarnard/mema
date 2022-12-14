@@ -48,8 +48,15 @@ echo 'install python3 packages, make take a while'
 echo  '*-------------------------------------------------------------------------------*'
 sudo -H pip install -r  requirements.txt
 #FIXME: voice bonnet stuff: not happy about this, does tons of 'other stuff' as well!
-wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/raspi-blinka.py
-sudo python3 raspi-blinka.py
+# read the docs
+#wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/raspi-blinka.py
+#sudo python3 raspi-blinka.py
+# cant find board
+#sudo pip3 install rpi_ws281x adafruit-circuitpython-neopixel
+#sudo python3 -m pip install --force-reinstall adafruit-blinka
+
+
+
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing intent server service'
 cp etc/systemd/intent_server.service /etc/systemd/system/

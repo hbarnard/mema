@@ -136,6 +136,7 @@ def run_photo_command(number,please):
     cur = con.cursor()
     # picture = local[config['main']['picture_program']]
     picture = subprocess.check_output(config['main']['picture_program'])
+    print('picture is: ' + picture.decode("utf-8"))
     result = picture()
     (text, file_path) = result.split('|')
     file_path.rstrip()

@@ -35,8 +35,7 @@ def main():
         DOTSTAR_DATA = board.D5
         DOTSTAR_CLOCK = board.D6
         dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
-        dots.deinit()
-        
+
     config = ConfigObj('etc/mema.ini')
     logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
 
