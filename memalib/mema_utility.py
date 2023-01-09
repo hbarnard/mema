@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import datetime
 from configobj import ConfigObj
+from fastapi import WebSocket
 
 config = ConfigObj('etc/mema.ini')
 logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
@@ -73,7 +74,7 @@ def docker_control(command,instance_name):
     return int(datetime.datetime.now().timestamp())
 
 
-#FIXME: not used current, but useful
+#FIXME: not used currently, but useful
 
 def system_health():
 
@@ -102,14 +103,33 @@ def system_health():
             mema_health[name] = 'dotred'
     c.close()
     
-    # test whether wifi is up
-    text_string = Path('/proc/net/wireless').read_text()
-    m = re.match(r"wlp2s0", text_string)
+    # test whether wifi is up, make a long line rather than use complex regex!
+    t = Path('/proc/net/wireless').read_text()
+    t = ''.join(t.splitlines())
+    m = re.search(r'wlp', t)
+    print('m is ', m, t)  
     if m:
         mema_health['wifi'] = 'dotgreen'
     else:
         mema_health['wifi'] = 'dotred'
     return mema_health
 
+
 def timer_function():  
    print("timed out \n")  
+   
+
+# websocket manager, inspiration is https://gealber.com/simple-chat-app-websockets-fastapi   
+   
+class ConnectionManager:
+    def __init__(self):
+        self.connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.connections.append(websocket)
+
+    async def broadcast(self, data: str):
+        for connection in self.connections:
+            await connection.send_text(data)
+

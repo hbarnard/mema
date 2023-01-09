@@ -11,7 +11,7 @@ tr:nth-child(even) {
 }
 
 .dotred {
-  height: 1px;
+  height: 25px;
   width: 25px;
   background-color: #f00;
   border-radius: 50%;
@@ -30,7 +30,7 @@ tr:nth-child(even) {
 </style>
 
 <script>
-        /*    var ws = new WebSocket("ws://10.0.0.86:8000/ws");
+            var ws = new WebSocket("ws://localhost:8000/ws");
             ws.onmessage = function(event) {
                 var messages = document.getElementById('messages')
                 // var message = document.createElement('li')
@@ -51,27 +51,35 @@ tr:nth-child(even) {
             }
 
            setInterval(sendMessage, 30000); 
-          */  
+            
             
             
 </script>
 
 <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 <title>Memories</title>
-<meta http-equiv="refresh" content="30;url=/memories.html" />
+<!--<meta http-equiv="refresh" content="30;url=/memories.html" />-->
 </head>
 
 
 
-<h2>Memories</h2>
+<h2>Mema3: Your Memories</h2>
 
+<!--
 <img src="../static/wordcloud.svg" />
 {% if "type" in request.query_params: %}
 <img src="../static/Neuroscience.gif" width=400 height=200 />
 {% else %}
 <img src="../static/Neuroscience.gif" width=400 height=200 />
 {% endif %}
+-->
+
 <hr/>
+
+{% for item in mema_health %}
+&nbsp; <span class="{{mema_health[item]}}"></span>     
+{% endfor %}
+
        <span id='messages'></span>
 <hr/>
 <table>

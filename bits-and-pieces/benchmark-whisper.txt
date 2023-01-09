@@ -69,3 +69,16 @@ whisper_print_timings:   encode time = 195740.19 ms / 32623.37 ms per layer
 whisper_print_timings:   decode time = 57331.04 ms / 9555.17 ms per layer
 whisper_print_timings:    total time = 259338.50 ms
 pi@mema3:~/whisper.cpp $ ./main -h
+
+Thinkpad
+
+whisper_print_timings:     load time =   422.48 ms
+whisper_print_timings:      mel time =  2901.66 ms
+whisper_print_timings:   sample time =   155.64 ms
+whisper_print_timings:   encode time = 26528.44 ms / 4421.41 ms per layer
+whisper_print_timings:   decode time = 11414.45 ms / 1902.41 ms per layer
+whisper_print_timings:    total time = 41441.81 ms
+
+
+
+

@@ -1,0 +1,96 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <title>Mema3</title>
+  <meta name="mema3" content="mema3" />
+  <meta name="keywords" content="website keywords, website keywords" />
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252" />
+  <link rel="stylesheet" type="text/css" href="/static/style/style.css" title="style" />
+  <!--<meta http-equiv="refresh" content="30;url=/memories.html" />-->
+  <!--<script src="/static/script/websocket.js"></script>-->
+
+</head>
+
+<body>
+  <div id="main">
+    <div id="header">
+      <div id="logo">
+        <div id="logo_text">
+          <!-- class="logo_colour", allows you to change the colour of the text -->
+          <h1><a href="index.html">Mema<span class="logo_colour">3</span></a></h1>
+          <h2></h2>
+        </div>
+      </div>
+      <div id="menubar">
+        <ul id="menu">
+          <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
+          <li class="selected"><a href="index.html">Guide</a></li>
+          <li><a href="/memories.html">Memories</a></li>
+          <li><a href="page.html">Mosaic</a></li>
+          <li><a href="another_page.html"></a></li>
+          <li><a href="contact.html">Privacy Form</a></li>
+        </ul>
+      </div>
+    </div>
+    <div id="site_content">
+      <div class="sidebar">
+        <!-- insert your sidebar items here 
+       {% for item in mema_health %}
+         &nbsp; <span class="{{mema_health[item]}}"></span>     
+       {% endfor %}
+    -->
+       <span id='messages'></span>
+<hr/>
+
+      </div>
+      <div id="content">
+<h3>Voice Commands</h3>
+<pre>
+    
+    
+*what time is it
+tell me the time
+
+*[GetTemperature]
+whats the temperature
+how (hot | cold) is it
+
+[TakePhoto]
+photograph
+
+[StoreStory]
+record a story
+
+[RecordVideo]
+record a video
+record a video please
+
+[Associate]
+put photo with story
+put story with photo
+
+[TellStory]
+tell me a story
+
+[GetStory]
+please get me story (1..60)
+
+[SlicePie]
+give me some pie
+give me some pie please
+
+[LetsGo]
+let's go
+vision on
+
+</pre>
+      </div>
+    </div>
+    <div id="content_footer"></div>
+    <div id="footer">
+
+    </div>
+  </div>
+</body>
+</html>

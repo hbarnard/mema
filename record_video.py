@@ -14,7 +14,7 @@ import memalib.mema_utility as mu
 
 # main script
 def main():
-
+    dots = {}
     config = ConfigObj('etc/mema.ini')
     logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
         

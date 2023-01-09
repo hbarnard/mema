@@ -31,6 +31,7 @@ else:
     pygame.camera.init()
 
 def main():
+    dots = {}
     if pi:
         DOTSTAR_DATA = board.D5
         DOTSTAR_CLOCK = board.D6

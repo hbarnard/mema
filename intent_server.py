@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request
 import sys
 import os, pwd
 
+import webbrowser as wb
+
 # for system health, but pycurl should be used elsewhere
 # get rid of one of these, pycurl_request is probably problematic
 
@@ -52,6 +54,7 @@ api_router = APIRouter()
 
 #FIXME: Problems with xdg-open
 os.environ["DISPLAY"] = ":0.0"
+#xset -display :0 -dpms
 
 pi  = False 
 # no test on system name in os now, unreliable, changed from arm to aaarch    
@@ -262,12 +265,58 @@ def run_pie(number,please):
 #FIXME: Oh boy, what a problem for something v. simple!
 # make general!
 
+'''[
 def run_front_page(number,please):
 
     Call_URL = "http://localhost:8000/memories.html"
     mycmd = r'handlr open  {}'.format(Call_URL)
     subprocess.Popen(mycmd,shell = True) 
- 
+'''
+    
+def run_front_page(number,please):
+
+
+    mu.curl_speak(config['en_prompts']['ok_going'])    
+    #wb.open('http://localhost:8000/memories.html', new=2)
+    wb.get('/usr/bin/chromium').open('http://localhost:8000/memories.html', new=0)
+'''     
+    try:
+        Call_URL = "http://localhost:8000/memories.html"
+        mycmd = r'jaro  {}'.format(Call_URL)
+        logging.debug('in jaro command ' + mycmd)
+        mycmd = 'chromium-browser --display=:0 --kiosk --incognito --window-position=0,0 https://reelyactive.github.io/diy/pi-kiosk/'
+        #subprocess.run([mycmd, number[0] ],  stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
+        subprocess.run(mycmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        #subprocess.Popen(mycmd,shell = True)   
+    except subprocess.CalledProcessError as e:
+        logging.debug('in jaro command error' + mycmd)
+        raise RuntimeError("command '{}' return here with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+'''        
+
+#FIXME: Probably merge this with memories fetch? Don't let these one page calls multiply?
+@app.get("/privacy.html")
+def fetch_privacy(request: Request):
+    mema_health = system_health()
+    if mema_health['wifi'] == 'dotgreen':
+        mu.curl_speak('the_wifi_network_is_connected')
+    else:
+       mu.curl_speak('the_wifi_network_is_off')
+            
+    if config['main']['use_external_ai'] == 'yes':
+        mu.curl_speak('external_services_for_labelling_and_transcription_are_on')
+    else:
+        mu.curl_speak('external_services_are_off')
+        
+    #FIXME: wordcloud() not here, in a cron
+    return TEMPLATES.TemplateResponse(
+        "privacy.html",
+        {"request": {}, "results" :{}, "mema_health": system_health()}
+    )
+
+
+
+
+
 
 def run_search_memories(number,please):
     print('in search memories')
