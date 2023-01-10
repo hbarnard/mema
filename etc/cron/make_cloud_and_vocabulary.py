@@ -45,7 +45,10 @@ def get_stopwords():
             stop_dict[line.rstrip()] = 1
     return stop_dict
 
-root_dir = '/home/hbarnard/projects/mema/'
+
+#FIXME: probably need this for the moment, since its a cron, therefore full path
+root_dir = '/home/pi/mema/'
+
 config = configparser.ConfigParser()
 config.read((root_dir + "etc/mema.ini"))
 con = sqlite3.connect(config['main']['db'], check_same_thread=False)

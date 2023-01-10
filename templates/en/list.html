@@ -1,99 +1,70 @@
+<!DOCTYPE HTML>
+<html>
+
 <head>
-<style>
-table, th, td, tr {
-  border: 1px ;
-  // color: red ;
-  padding: 5px;
-}
-
-tr:nth-child(even) {
-  background-color: LightBlue;
-}
-
-.dotred {
-  height: 25px;
-  width: 25px;
-  background-color: #f00;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-
-.dotgreen {
-  height: 25px;
-  width: 25px;
-  background-color: #0f0;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-</style>
-
-<script>
-            var ws = new WebSocket("ws://localhost:8000/ws");
-            ws.onmessage = function(event) {
-                var messages = document.getElementById('messages')
-                // var message = document.createElement('li')
-                //var content = document.createTextNode(event.data)
-                document.getElementById('messages').innerHTML = event.data
-                // message.appendChild(content)
-                // messages.appendChild(message)
-            };
-            function sendMessage(event) {
-               // var input = document.getElementById("messageText")
-               // ws.send(input.value)
-               // input.value = ''
-              if  (ws.readyState == 1) {
-                ws.send('wakeup')
-              } else { 
-                event.preventDefault()
-              }  
-            }
-
-           setInterval(sendMessage, 30000); 
-            
-            
-            
-</script>
-
-<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-<title>Memories</title>
-<!--<meta http-equiv="refresh" content="30;url=/memories.html" />-->
+  <title>Mema3</title>
+  <meta name="mema3" content="mema3" />
+  <meta name="keywords" content="website keywords, website keywords" />
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252" />
+  <link rel="stylesheet" type="text/css" href="/static/style/style.css" title="style" />
+  <meta http-equiv="refresh" content="40;url=/memories.html" />
+  
+  <script src="/static/script/jquery-3.6.3.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="/static/script/DataTables/datatables.min.css"/>
+  <script type="text/javascript" src="/static/script/DataTables/datatables.min.js"></script>
+  <script src="/static/script/websocket.js"></script>
+  <script>
+  $(document).ready(function () {
+    $('#memories').DataTable();
+  });
+  </script>
 </head>
 
-
-
-<h2>Mema3: Your Memories</h2>
-
-<!--
-<img src="../static/wordcloud.svg" />
-{% if "type" in request.query_params: %}
-<img src="../static/Neuroscience.gif" width=400 height=200 />
-{% else %}
-<img src="../static/Neuroscience.gif" width=400 height=200 />
-{% endif %}
--->
-
-<hr/>
-
-{% for item in mema_health %}
-&nbsp; <span class="{{mema_health[item]}}"></span>     
-{% endfor %}
-
+<body>
+  <div id="main">
+    <div id="header">
+      <div id="logo">
+        <div id="logo_text">
+          <!-- class="logo_colour", allows you to change the colour of the text -->
+          <h1><a href="/memories.html">Mema<span class="logo_colour">3</span></a></h1>
+        </div>
+      </div>
+      <div id="menubar">
+        <ul id="menu">
+          <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
+          <li class="selected"><a href="/static/guide.html">Guide</a></li>
+          <li><a href="/memories.html">Memories</a></li>
+          <li><a href="/static/mosaic.html">Mosaic</a></li>
+          <li><a href="another_page.html"></a></li>
+          <li><a href="/static/privacy.html">Privacy Form</a></li>
+        </ul>
+      </div>
+    </div>
+    <div id="site_content">
+      <div class="sidebar">
+        <!-- insert your sidebar items here --> 
+       {% for item in mema_health %}
+         &nbsp; <span class="{{mema_health[item]}}"></span>     
+       {% endfor %}
+    
        <span id='messages'></span>
 <hr/>
-<table>
+
+      </div>
+      <div id="content">
+ <table id="memories" class="display">
+<thead>
 <tr>
     
- 
-        <td>No.</td>
-        <td>Heading</td>
+        <th>No.</th>
+        <th>Heading</th>
        <!-- <td>File Path</td> -->
-        <td>Public *</td>
-        <td>Recorded</td>
-        <td>Type</td>
-
+        <th>Public *</th>
+        <th>Recorded</th>
+        <th>Type</th>
 </tr>
+</thead>
+<tbody>
 {% for result in results %}
     <tr>
         <td><a href="memory/{{ result[0] }}">{{ result[0] }}</a></td>
@@ -105,8 +76,13 @@ tr:nth-child(even) {
         <td>{{ result[5] }}</td>
     </tr>
 {% endfor %}
+</tbody>
+      </div>
+    </div>
+    <div id="content_footer"> * If there's a zero here it's a <b>public</b> memory</div>
+    <div id="footer">
 
-</table>
-
-<br/>
-* 0 in <b>public</b> means that the memory is private, this is the default
+    </div>
+  </div>
+</body>
+</html>

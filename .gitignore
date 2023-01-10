@@ -3,4 +3,7 @@ static/media/tmp/*
 static/media/vid/*
 static/media/pic/*
 *.log
+static/script/jquery-3.6.3.min.js
+static/script/DataTables/datatables.min.css
+static/script/DataTables/datatables.min.js
 

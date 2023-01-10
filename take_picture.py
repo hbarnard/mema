@@ -10,9 +10,15 @@ from configobj import ConfigObj
 import memalib.mema_utility as mu
 import logging
 
-# 12/12/2022 now on bullseye uses libcamera command, not Picamera
+
+
+# 12/12/2022 Pi now on bullseye uses libcamera command, not Picamera
 
 config = ConfigObj('etc/mema.ini')
+
+# this is a hack to make sure we have ENV everywhere we need it
+my_env = mu.get_env(config['main']['env_file'])
+
 
 pi  = False 
 #FIXME: mema.ini produces strings! also no test on system name now, unreliable
@@ -32,6 +38,8 @@ else:
 
 def main():
     dots = {}
+
+    
     if pi:
         DOTSTAR_DATA = board.D5
         DOTSTAR_CLOCK = board.D6
@@ -66,10 +74,9 @@ def main():
         dots[0] = (0,255,0)  # red
     else:
         img = camera.get_image()
+        logging.debug('in pygame' + file_path)
         pygame.image.save(img,file_path)
         
-    image_file = Path(file_path)
-
     # prediction phase
     dots[0] = (0,255,0) if pi else None
                     
@@ -77,13 +84,16 @@ def main():
     
     if config['main']['use_external_ai']  == 'yes':
         mu.curl_speak(config['en_prompts']['trying_caption'])
-        model = replicate.models.get("j-min/clip-caption-reward")
+        logging.debug('caption token ' + my_env['REPLICATE_API_TOKEN'] )
+        api = replicate.Client(api_token=my_env['REPLICATE_API_TOKEN'])
+        model = api.models.get("j-min/clip-caption-reward")
+        image_file = Path(file_path)
         result = model.predict(image=image_file)
         mu.curl_speak(config['en_prompts']['done'])
     else:
         mu.curl_speak(config['en_prompts']['done'])
 
-    logging.debug('end of taking picture')
+    logging.debug('end of taking picture ' + result + ' ' + media_path )
     dots.deinit() if pi else None
     print(result  + "|" + media_path)
 

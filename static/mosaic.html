@@ -7,7 +7,7 @@
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=windows-1252" />
   <link rel="stylesheet" type="text/css" href="/static/style/style.css" title="style" />
-  <meta http-equiv="refresh" content="30;url=/memories.html" />
+  <!--<meta http-equiv="refresh" content="10;url=/memories.html" />-->
   <script src="/static/script/websocket.js"></script>
 
 </head>
@@ -18,7 +18,7 @@
       <div id="logo">
         <div id="logo_text">
           <!-- class="logo_colour", allows you to change the colour of the text -->
-          <h1><a href="/memories.html">Mema<span class="logo_colour">3</span></a></h1>
+          <h1><a href="index.html">Mema<span class="logo_colour">3</span></a></h1>
           <h2></h2>
         </div>
       </div>
@@ -27,7 +27,7 @@
           <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
           <li class="selected"><a href="/static/guide.html">Guide</a></li>
           <li><a href="/memories.html">Memories</a></li>
-          <li><a href="page.html">Mosaic (not done)</a></li>
+          <li><a href="page.html">Mosaic</a></li>
           <li><a href="another_page.html"></a></li>
           <li><a href="/static/privacy.html">Privacy Form</a></li>
         </ul>
@@ -35,52 +35,21 @@
     </div>
     <div id="site_content">
       <div class="sidebar">
-        <!-- insert your sidebar items here --> 
+        <!-- insert your sidebar items here 
        {% for item in mema_health %}
          &nbsp; <span class="{{mema_health[item]}}"></span>     
        {% endfor %}
-    
+    -->
        <span id='messages'></span>
 <hr/>
 
       </div>
       <div id="content">
-<h2>{{ field[1] }}</h2>
+          <b></b>
+          <br/><br/>
+        <!-- insert the page content here -->
 
-<table >
-<tr>
-<td>
-<table style="border:1px solid black;">     
- <tr>      <td>Rec No</td> <td>{{ field[0] }}</td></tr>
- <tr>      <td>Heading</td><td>{{ field[1] }}</td> </tr>
- <tr>      <td>Text</td><td>{{ field[2] }}</td> </tr>
-<!-- <tr>      <td>File Path</td> <td><a href="{{ field[3] }}">{{ field[3] }}</a></td></tr> -->
- <tr>      <td>Public*</td> <td>{{ field[5] }}</td></tr>
-  <tr>      <td>* If there's a zero here it's a <b>public</b> memory</td> <td></td></tr>
- <tr>      <td>Type</td> <td>{{ field[7] }}</td></tr>
- 
-  
-</table>
-</td>
-<td>
-{% if field[7] == 'text': %}
-<audio controls>
-  <source src="/{{field[3]}}" type="audio/wav">
-</audio>
-
-{% elif field[7] == 'photo': %}
-<img src="/{{field[3]}}" alt="{{ field[1] }}" width="384" height="288"/>
-
-{% elif field[7] == 'video': %}
-
-
-
-{% endif %}
-
-
-</td>
-</tr>
-</table>
+       <img src="/static/media/pic/montage.jpg" />
       </div>
     </div>
     <div id="content_footer"></div>

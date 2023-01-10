@@ -13,7 +13,7 @@ from fastapi import WebSocket
 config = ConfigObj('etc/mema.ini')
 logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
 
-
+'''
 #FIXME: is this used anywhere right now?
 class run_subprocess(th.Thread):
     def __init__(self,command):
@@ -31,7 +31,22 @@ def demote(user_uid, user_gid):
     def result():
         os.setgid(user_gid)
         os.setuid(user_uid)
-    return result                
+    return result
+'''
+
+def open_url(page):
+    try:
+        url = config['main']['intent_server'] + '/' + page
+        open_command = r'jaro  {}'.format(url)
+        logging.debug('in jaro command ' + open_command)
+        #open_command = 'chromium-browser --display=:0 --kiosk --incognito --window-position=0,0 https://reelyactive.github.io/diy/pi-kiosk/'
+        #subprocess.run([open_command, number[0] ],  stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
+        #subprocess.run(open_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.Popen(open_command,shell = True)   
+    except subprocess.CalledProcessError as e:
+        logging.debug('jaro open_url command error' + open_command)
+        raise RuntimeError("command '{}' return here with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+    return        
 
 
 #FIXME: Need this for xdg-open, maybe theres another simpler way?
@@ -65,9 +80,33 @@ def curl_speak(phrase):
     return
 
 
+def curl_get(url):
+    logging.debug(url)
+    cl = '''curl -s {url}'''
+    cl_array = cl.split()
+    subprocess.call(cl_array,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
+    return
+
+
+#FIXME: this is a hack, mainly to get the REPLICATE_API_KEY reliably in various scripts and subprocesses
+# the actual location of .env is a configuration parameter in mema.ini
+def get_env(env_file):
+    my_env = {}
+
+    with open(env_file, 'r') as f:
+        for line in f:
+            items = line.split('=')
+            #logging.debug(items)
+            key, value = items[0], items[1].rstrip()
+            my_env[key] = value
+    return my_env
+
+#FIXME: this may requite a no password entry via root visudo, see: 
+# https://stackoverflow.com/questions/567542/running-a-command-as-a-super-user-from-a-python-script
+
 def docker_control(command,instance_name):
     try:
-        subprocess.run(["docker", command, instance_name], check=True, capture_output=True, text=True).stdout
+        subprocess.run(['sudo' , "docker", command, instance_name], check=True, capture_output=True, text=True).stdout
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
     # make a file name from the current unix timestamp
@@ -107,7 +146,7 @@ def system_health():
     t = Path('/proc/net/wireless').read_text()
     t = ''.join(t.splitlines())
     m = re.search(r'wlp', t)
-    print('m is ', m, t)  
+    #print('m is ', m, t)  
     if m:
         mema_health['wifi'] = 'dotgreen'
     else:

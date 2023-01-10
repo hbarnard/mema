@@ -294,17 +294,6 @@ table tr td
 { background: #F0EFE2;
   color: #47433F;
   border-top: 1px solid #FFF;}
-  
-  
-table, th, td, tr {
-  border: 1px ;
-  // color: red ;
-  padding: 5px;
-}
-
-tr:nth-child(even) {
-  background-color: LightBlue;
-}
 
 .dotred {
   height: 25px;
@@ -313,7 +302,6 @@ tr:nth-child(even) {
   border-radius: 50%;
   display: inline-block;
 }
-
 
 .dotgreen {
   height: 25px;

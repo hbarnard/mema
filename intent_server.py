@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 import sys
 import os, pwd
 
+#FIXME: this isn't really the answer either
 import webbrowser as wb
 
 # for system health, but pycurl should be used elsewhere
@@ -27,8 +28,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, WebSocket
 
+import os
 import re
-
+from dotenv import load_dotenv
 import memalib.mema_utility as mu
 
 #FIXME: currently this is a hard install, look at https://github.com/amueller/word_cloud and stackoverflow for help
@@ -38,7 +40,15 @@ import logging
 
 from configobj import ConfigObj
 
+#load_dotenv()
+#os.environ["'REPLICATE_API_TOKEN'"] = os.environ.get('REPLICATE_API_TOKEN')
+
+
 config = ConfigObj('etc/mema.ini')
+
+# this is a hack to make sure we have ENV everywhere we need it
+my_env = mu.get_env(config['main']['env_file'])
+
 logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
 
 con = sqlite3.connect(config['main']['db'], check_same_thread=False)
@@ -54,6 +64,9 @@ api_router = APIRouter()
 
 #FIXME: Problems with xdg-open
 os.environ["DISPLAY"] = ":0.0"
+
+my_env = os.environ.copy()
+
 #xset -display :0 -dpms
 
 pi  = False 
@@ -100,15 +113,15 @@ async def info(info : Request):
 
         'TakePhoto'      : run_photo_command,
       #  'GetTime'        : run_time_command,
-     #  'TellStory'      : print("tell story found"),   
-    #   'Associate'      : print("associate photo and story found"),
+      #  'TellStory'      : print("tell story found"),   
+      #  'Associate'      : print("associate photo and story found"),
         'RecordStory'    : run_record_command,
         'RecordVideo'    : run_video_command,
         'KillVideo'      : run_kill_video_command,  
         'LabelVideo'     : run_label_video_command,       
         'SlicePie'       : run_pie,
         'SearchPage'     : run_search_command,
-        'LetsGo'         : run_front_page,
+        'LetsGo'         : fetch_privacy,
         'SearchMemories' : run_search_memories      
 
     }
@@ -131,48 +144,51 @@ async def info(info : Request):
 # take a photo and store it
             
 def run_photo_command(number,please):
-    
-    print("take photo found") if config['main']['debug'] else None
-    
+        
     # FIXME: nice to have websocket notification
-    #command = config['main']['xdg_open_command'] + '?type=thinking'
-    #xdg_open_array = command.split()
-    # subprocess.call(xdg_open_array, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-    cur = con.cursor()
-    # picture = local[config['main']['picture_program']]
-    result = subprocess.check_output(config['main']['picture_program'])
-    print(result.decode()) 
-    res = result.decode()
-    [text, file_path] = res.split("|")
-    #file_path.rstrip()
+    logging.debug('photo token' + my_env['REPLICATE_API_TOKEN'])
+    result = ''
+    try:
+        result = subprocess.run(config['main']['picture_program'], check=True, text=True, capture_output=True, env=my_env).stdout
+    except subprocess.CalledProcessError as e:
+        logging.debug('picture command failed: ' + str(e.returncode) + ' ' + e.output)
+        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+        
+    (text, file_path) = result.split("|")
+    file_path.rstrip()
+    logging.debug('picture return' + ' ' + text + ' ' + file_path)
+    
     unix_time = int(datetime.datetime.now().timestamp())
+    description = text[0:30]
+    
+    cur = con.cursor()
     cur.execute("INSERT INTO memories (description, text, file_path, unix_time, public, owner, type) values (?, ?,?, ?, ?, ?,? )", (text, text, file_path, unix_time, 0, 1, 'photo'))
-    con.commit()
-    print("photo command done") if config['main']['debug'] else None
+    con.commit()    
     return 
 
 # record audio and store it
     
 def run_record_command(number,please):
     
-    logging.debug('record story found')
- 
-    result = subprocess.check_output(config['main']['story_program'])
-    result_string = result.decode('utf-8')
+    result = ''
+    try:
+        result = subprocess.run(config['main']['story_program'], check=True, text=True, capture_output=True).stdout
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+    logging.debug('record story intial return' + ' ' + result)
 
-    (text, file_path) = result_string.split('|')
+    (text, file_path) = result.split('|')
     file_path.rstrip()
+    logging.debug('record story return' + ' ' + text + ' ' + file_path)
     unix_time = int(datetime.datetime.now().timestamp())
     description = text[0:30]
     
     cur = con.cursor()
     cur.execute("INSERT INTO memories (description, text, file_path, unix_time, public, owner, type) values (?, ?,?, ?, ?, ?,? )", (description, text, file_path, unix_time, 0, 1, 'text'))
     con.commit()
-    return text  
+    return
     
-#FIXME: vlc doesn't work properly on laptop  
-# record video and store it
+
   
 def run_video_command(number,please):
     
@@ -209,7 +225,7 @@ def run_kill_video_command(number,please):
     return
 
 
-# shares code with transcribe and needs external AI, at present
+# FIXME: untested! shares code with transcribe and needs external AI, at present
 # FIXME: label anything in database, extend this
    
 def run_label_video_command(number,please):
@@ -240,11 +256,18 @@ def run_label_video_command(number,please):
 #FIXME: to be done, associate n with m?
     
 def run_associate_command(number,please):
-    print("running classifier") if config['main']['debug'] else None
     s2_out = subprocess.check_output([sys.executable, "/home/pi/projects/mema/associate.py"])
     return s2_out    
  
 
+# produce a composite of thumbnails
+
+def run_mosaic_command(number,please):
+    mosaic_array = config['main']['mosaic_program'].split()
+    subprocess.call(mosaic_array, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return
+    
+    
 # skeletion get search page, see https://community.rhasspy.org/t/recognized-untrain-sentences-words/465/5
 # discussion of wildcards
 
@@ -264,60 +287,28 @@ def run_pie(number,please):
 
 #FIXME: Oh boy, what a problem for something v. simple!
 # make general!
-
-'''[
-def run_front_page(number,please):
-
-    Call_URL = "http://localhost:8000/memories.html"
-    mycmd = r'handlr open  {}'.format(Call_URL)
-    subprocess.Popen(mycmd,shell = True) 
-'''
     
 def run_front_page(number,please):
 
-
     mu.curl_speak(config['en_prompts']['ok_going'])    
-    #wb.open('http://localhost:8000/memories.html', new=2)
-    wb.get('/usr/bin/chromium').open('http://localhost:8000/memories.html', new=0)
-'''     
-    try:
-        Call_URL = "http://localhost:8000/memories.html"
-        mycmd = r'jaro  {}'.format(Call_URL)
-        logging.debug('in jaro command ' + mycmd)
-        mycmd = 'chromium-browser --display=:0 --kiosk --incognito --window-position=0,0 https://reelyactive.github.io/diy/pi-kiosk/'
-        #subprocess.run([mycmd, number[0] ],  stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
-        subprocess.run(mycmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        #subprocess.Popen(mycmd,shell = True)   
-    except subprocess.CalledProcessError as e:
-        logging.debug('in jaro command error' + mycmd)
-        raise RuntimeError("command '{}' return here with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-'''        
+    mu.open_url('static/privacy.html')   
+    return        
+
 
 #FIXME: Probably merge this with memories fetch? Don't let these one page calls multiply?
 @app.get("/privacy.html")
-def fetch_privacy(request: Request):
-    mema_health = system_health()
+def fetch_privacy(request: Request, response_class=HTMLResponse ):
+    mema_health = mu.system_health()
     if mema_health['wifi'] == 'dotgreen':
-        mu.curl_speak('the_wifi_network_is_connected')
+       mu.curl_speak('the_wifi_network_is_connected')
     else:
        mu.curl_speak('the_wifi_network_is_off')
-            
     if config['main']['use_external_ai'] == 'yes':
-        mu.curl_speak('external_services_for_labelling_and_transcription_are_on')
+       mu.curl_speak('external_services_for_labelling_and_transcription_are_on')
     else:
         mu.curl_speak('external_services_are_off')
-        
-    #FIXME: wordcloud() not here, in a cron
-    return TEMPLATES.TemplateResponse(
-        "privacy.html",
-        {"request": {}, "results" :{}, "mema_health": system_health()}
-    )
-
-
-
-
-
-
+    mu.open_url('static/privacy.html')   
+ 
 def run_search_memories(number,please):
     print('in search memories')
     mu.curl_speak('found_a_set_of_memories')
@@ -350,11 +341,10 @@ def fetch_all(request: Request, response_class=HTMLResponse ):
 
 @app.get("/memory/{id}")
 def fetch_data(request: Request, id: int):
-    
     cur = con.cursor()
     result = cur.execute("SELECT * FROM memories WHERE memory_id={}".format(str(id)))
     field = result.fetchone()
-    return TEMPLATES.TemplateResponse(
+    return templates.TemplateResponse(
         "memory.html",
         {"request": request,  "field": field}
     )
@@ -365,7 +355,7 @@ def fetch_data(request: Request, id: int):
 @app.post("/memory/{id}/speak")
 def fetch_data(id: int):
     
-    print("get story found") if config['main']['debug'] else None
+    #print("get story found") if config['main']['debug'] else None
     cur = con.cursor()
     result = cur.execute("SELECT text FROM memories WHERE memory_id={}".format(str(id)))
     fields = result.fetchone()
@@ -374,6 +364,8 @@ def fetch_data(id: int):
         text = ' '.join(lines)
         phrase = text.replace(' ','_')
         mu.curl_speak(phrase)
+        url = 'memory' + '/' +str(id)
+        mu.open_url(url)
     else:
         mu.curl_speak(config['en_prompts']['sorry'])
     return fields
@@ -384,8 +376,6 @@ def fetch_data(id: int):
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     while True:
-        if websocket.connected:
-            data = await websocket.receive_text()
-            await websocket.send_text(f"message text")
-    
+        data = await websocket.receive_text()
+        await websocket.send_text(f"Message text was: {data}")
     
