@@ -30,7 +30,8 @@ apt install python3-matplotlib python3-tk
 apt install mosquitto mosquitto-dev
 apt install sqlite3
 # may or may not need ffmpeg for sample conversion
-apt install ffmpeg portaudio portaudio19-dev fswebcam curl python3-pyaudio guile2.0
+apt install ffmpeg portaudio portaudio19-dev fswebcam curl python3-pyaudio guile2.0 chromium-browser
+#FIXME: is this correct for docker, hard install?
 sudo apt install docker.io
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing mema3'
@@ -43,13 +44,13 @@ cp etc/systemd/intent_server.service /etc/systemd/system/
 cp etc/mema_pi.ini etc/mema.ini
 systemctl daemon-reload
 echo  '*-------------------------------------------------------------------------------*'
-echo 'trying to start containers'
+echo 'trying to start containers, these run as root'
 usermod -aG docker pi
 docker run -d --network host --name mema_rhasspy --restart unless-stopped -v "$HOME/.config/rhasspy/profiles:/profiles" -v "/etc/localtime:/etc/localtime:ro" --device /dev/snd:/dev/snd rhasspy/rhasspy --user-profiles /profiles --profile en
 sudo docker run --network host -d --restart unless-stopped --name mema_mimic3 -v "${HOME}/.local/share/mycroft/mimic3:/home/mimic3/.local/share/mycroft/mimic3" 'mycroftai/mimic3'
 docker run -d --network host -v node_red_data:/data --restart unless-stopped --name mema_nodered nodered/node-red
 echo  '*-------------------------------------------------------------------------------*'
-echo 'starting intent server'
+echo 'starting intent server, this should run as pi on the pi otherwise modify for the user'
 systemctl start intent_server
 echo  '*-------------------------------------------------------------------------------*'
 echo 'almost done!'

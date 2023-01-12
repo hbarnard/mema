@@ -145,7 +145,7 @@ def system_health():
     # test whether wifi is up, make a long line rather than use complex regex!
     t = Path('/proc/net/wireless').read_text()
     t = ''.join(t.splitlines())
-    m = re.search(r'wlp', t)
+    m = re.search(r'wl', t)
     #print('m is ', m, t)  
     if m:
         mema_health['wifi'] = 'dotgreen'
