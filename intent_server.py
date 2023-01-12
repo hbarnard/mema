@@ -30,7 +30,6 @@ from fastapi import FastAPI, WebSocket
 
 import os
 import re
-from dotenv import load_dotenv
 import memalib.mema_utility as mu
 
 #FIXME: currently this is a hard install, look at https://github.com/amueller/word_cloud and stackoverflow for help
