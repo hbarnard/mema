@@ -18,7 +18,6 @@
                 event.preventDefault()
               }  
             }
-
            setInterval(sendMessage, 30000); 
             
             
