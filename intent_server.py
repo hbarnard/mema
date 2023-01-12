@@ -263,8 +263,9 @@ def run_associate_command(number,please):
 # produce a composite of thumbnails
 
 def run_mosaic_command(number,please):
-    mosaic_array = config['main']['mosaic_program'].split()
+    mosaic_array = config['main']['mosaic_command'].split()
     subprocess.call(mosaic_array, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    mu.open_url('static/mosaic.html')
     return
     
     
@@ -278,7 +279,7 @@ def run_search_command(number,please):
 def run_pie(number,please):
     if please != None:
         mu.curl_speak(config['en_prompts']['what_kind'])
-        mu.open_url(static/pie.html)
+        mu.open_url('static/pie.html')
     else:
         mu.curl_speak(config['en_prompts']['say_please'])
     return

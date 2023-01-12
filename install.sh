@@ -33,7 +33,7 @@ apt install python3-matplotlib python3-tk
 apt install mosquitto mosquitto-dev
 apt install sqlite3
 # may or may not need ffmpeg for sample conversion
-apt install ffmpeg portaudio portaudio19-dev fswebcam curl python3-pyaudio guile2.0 chromium-browser
+apt install ffmpeg portaudio portaudio19-dev fswebcam curl python3-pyaudio guile2.0 chromium-browser imagemagick -y
 #FIXME: is this correct for docker, hard install?
 sudo apt install docker.io
 echo  '*-------------------------------------------------------------------------------*'
