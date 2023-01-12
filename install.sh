@@ -20,6 +20,9 @@ mkdir static/media/rec
 mkdir static/media/vid
 mkdir static/media/pic
 
+#FIXME: not the same for laptop
+cp associations /home/pi/.config
+
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing packages'
 echo  '*-------------------------------------------------------------------------------*'

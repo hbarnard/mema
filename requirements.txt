@@ -8,6 +8,6 @@ time
 webbrowser
 wordcloud
 gunicorn
-uvicorn
+uvicorn[standard]
 
 

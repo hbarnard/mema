@@ -121,7 +121,8 @@ async def info(info : Request):
         'SlicePie'       : run_pie,
         'SearchPage'     : run_search_command,
         'LetsGo'         : fetch_privacy,
-        'SearchMemories' : run_search_memories      
+        'SearchMemories' : run_search_memories, 
+        'Mosaic'         : run_mosaic_command     
 
     }
     
@@ -277,12 +278,10 @@ def run_search_command(number,please):
 def run_pie(number,please):
     if please != None:
         mu.curl_speak(config['en_prompts']['what_kind'])
-        Call_URL = "http://localhost:8000/static/pie.html"
-        mycmd = r'handlr open  {}'.format(Call_URL)
-        subprocess.Popen(mycmd,shell = True) 
+        mu.open_url(static/pie.html)
     else:
-        mu.curl_speak(config['en_prompts']['nope'])
-        return
+        mu.curl_speak(config['en_prompts']['say_please'])
+    return
 
 #FIXME: Oh boy, what a problem for something v. simple!
 # make general!
