@@ -32,7 +32,7 @@ def main():
         DOTSTAR_DATA = board.D5
         DOTSTAR_CLOCK = board.D6
         dots = adafruit_dotstar.DotStar(DOTSTAR_CLOCK, DOTSTAR_DATA, 3, brightness=0.2)
-        dots.deinit()
+
         
     mu.curl_speak(config['en_prompts']['start_video'])
     
@@ -43,8 +43,9 @@ def main():
     #FIXME: libcamera, no audio currently, see extensive web commentary
     true_file_name = str(unix_time) + ".mp4" 
     
-    dots[0] = (255,0,0) if pi else None
-
+    if pi:
+        dots[0] = (255,0,0)
+        
     video_command = config['main']['video_command']
     true_file_path = config['main']['media_directory'] + "vid/" + true_file_name
     media_path = config['main']['media_directory_url'] + "vid/" + true_file_name   
@@ -57,8 +58,10 @@ def main():
         subprocess.call(revised_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-        
-    dots[0] = (0,0,255) if pi else None
+    
+    if pi:    
+        dots[0] = (0,0,255)
+    
     logging.debug('reload docker start')
     unix_time = mu.docker_control('start', 'mema_rhasspy')
     logging.debug('reload docker end')

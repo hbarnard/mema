@@ -44,7 +44,7 @@ def main():
 
     if pi:
         import board
-        from picamera import PiCamera
+        #from picamera import PiCamera
         # coloured LEDS on front of voice bonnet, for primitive feedback
         from digitalio import DigitalInOut, Direction, Pull
         import adafruit_dotstar
@@ -100,7 +100,7 @@ def main():
     text = config['en_literals']['unlabelled_audio']
    
     # speech to text on remote server
-    if config['main']['use_external_ai']:
+    if config['main']['use_external_ai'] == 'yes':
         #logging.debug('in record transcribe')
         
         # use whisper.cpp in the mema home directory, for example /home/pi/whisper.cpp for transacription
