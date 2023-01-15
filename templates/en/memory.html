@@ -8,7 +8,7 @@
   <meta http-equiv="content-type" content="text/html; charset=windows-1252" />
   <link rel="stylesheet" type="text/css" href="/static/style/style.css" title="style" />
   <meta http-equiv="refresh" content="30;url=/memories.html" />
-  <script src="/static/script/websocket.js"></script>
+  <!--<script src="/static/script/websocket.js"></script>-->
 
 </head>
 
@@ -35,11 +35,11 @@
     </div>
     <div id="site_content">
       <div class="sidebar">
-        <!-- insert your sidebar items here --> 
+        <!-- insert your sidebar items here -->
        {% for item in mema_health %}
-         &nbsp; <span class="{{mema_health[item]}}"></span>     
+         &nbsp; <span class="{{mema_health[item]}}"></span>
        {% endfor %}
-    
+
        <span id='messages'></span>
 <hr/>
 
@@ -50,16 +50,16 @@
 <table >
 <tr>
 <td>
-<table style="border:1px solid black;">     
+<table style="border:1px solid black;">
  <tr>      <td>Rec No</td> <td>{{ field[0] }}</td></tr>
  <tr>      <td>Heading</td><td>{{ field[1] }}</td> </tr>
  <tr>      <td>Text</td><td>{{ field[2] }}</td> </tr>
-<!-- <tr>      <td>File Path</td> <td><a href="{{ field[3] }}">{{ field[3] }}</a></td></tr> -->
+<td>File Path</td> <td><a href="/{{ field[3] }}">/{{ field[3] }}</a></td></tr>
  <tr>      <td>Public*</td> <td>{{ field[5] }}</td></tr>
   <tr>      <td>* If there's a zero here it's a <b>public</b> memory</td> <td></td></tr>
  <tr>      <td>Type</td> <td>{{ field[7] }}</td></tr>
- 
-  
+
+
 </table>
 </td>
 <td>
@@ -72,9 +72,10 @@
 <img src="/{{field[3]}}" alt="{{ field[1] }}" width="384" height="288"/>
 
 {% elif field[7] == 'video': %}
-
-
-
+<video width="640" height="480" controls muted>
+   <source src="/{{field[3]}}" type="video/mp4">
+   Your browser does not support the video tag.
+</video>
 {% endif %}
 
 

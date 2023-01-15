@@ -57,7 +57,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/media", StaticFiles(directory="static/media", html=True), name="media")   
 
 BASE_PATH = Path(__file__).resolve().parent
-templates = Jinja2Templates(directory="templates/en")
+templates = Jinja2Templates(directory="templates/en",  trim_blocks=True, lstrip_blocks=True)
 
 api_router = APIRouter()
 
@@ -343,6 +343,7 @@ def fetch_data(request: Request, id: int):
     cur = con.cursor()
     result = cur.execute("SELECT * FROM memories WHERE memory_id={}".format(str(id)))
     field = result.fetchone()
+    field[3].rstrip()
     return templates.TemplateResponse(
         "memory.html",
         {"request": request,  "field": field}

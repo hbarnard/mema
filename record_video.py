@@ -37,10 +37,10 @@ def main():
     mu.curl_speak(config['en_prompts']['start_video'])
     
     #FIXME: Actually no need to do this currently, since there's no audio!
-    logging.debug('unload docker')
+    #logging.debug('unload docker')
     unix_time = mu.docker_control('stop', 'mema_rhasspy')
     
-    #FIXME: libcamera, no audio currently, see extensive web commentary
+    #FIXME: libcamera on pi, no audio currently, see extensive web commentary
     true_file_name = str(unix_time) + ".mp4" 
     
     if pi:
