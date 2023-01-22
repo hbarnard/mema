@@ -21,7 +21,7 @@ import webbrowser
 
 from fastapi import UploadFile, File, Form
 from fastapi import APIRouter, Query, HTTPException
-#from fastapi.templating import Jinja2Templates
+#FIXME: preferably back to fastapi: from fastapi.templating import Jinja2Templates
 from starlette.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -39,40 +39,47 @@ import logging
 
 from configobj import ConfigObj
 
-#load_dotenv()
-#os.environ["'REPLICATE_API_TOKEN'"] = os.environ.get('REPLICATE_API_TOKEN')
-
-
-config = ConfigObj('etc/mema.ini')
-
-# this is a hack to make sure we have ENV everywhere we need it
-my_env = mu.get_env(config['main']['env_file'])
-
-logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
-
-con = sqlite3.connect(config['main']['db'], check_same_thread=False)
 app = FastAPI(debug=True)
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/media", StaticFiles(directory="static/media", html=True), name="media")   
 
 BASE_PATH = Path(__file__).resolve().parent
-templates = Jinja2Templates(directory="templates/en",  trim_blocks=True, lstrip_blocks=True)
+templates = Jinja2Templates(directory="templates/en")
 
 api_router = APIRouter()
 
-#FIXME: Problems with xdg-open
-os.environ["DISPLAY"] = ":0.0"
-
-my_env = os.environ.copy()
-
-#xset -display :0 -dpms
-
+# logged on user when filled user[1], user[2] for name
+# user[0] for id, see: https://github.com/tiangolo/fastapi/issues/592
+app.user = ()
 pi  = False 
-# no test on system name in os now, unreliable, changed from arm to aaarch    
-if config['main']['pi'] == 'yes' : 
-    pi = True
-        
+my_env = {}
+# config = ()
+con = {}
+
+@app.on_event("startup")
+async def startup_event():
+    global config
+    global my_env
+    global con
+    config = ConfigObj('etc/mema.ini')
+    # this is a hack to make sure we have ENV everywhere we need it
+    my_env = mu.get_env(config['main']['env_file'])
+    logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
+    logging.debug('mema3 started')  
+    con = sqlite3.connect(config['main']['db'], check_same_thread=False)
+    if config['main']['pi'] == 'yes' : 
+        pi = True
+    mu.open_url('static/offline.html')
+    return   
+
+#FIXME: consider doing more here, shutdown of rhasspy, for example, but restart problematic
+#FIXME: how do we get here, except via systemctl stop intent_server?
+@app.on_event("shutdown")
+def shutdown_event():
+    logging.debug('mema3 ended')  
+    mu.open_url('static/offline.html')
+    return   
+
 @app.post("/")
 async def info(info : Request):
     
@@ -99,30 +106,32 @@ async def info(info : Request):
             "status" : "FAIL"
         }
         
-    logging.debug(req_info)  
+    #logging.debug(req_info)  
       
-    # one or two, such as redirects can't be handled in the intent table
+    #FIXME one or two, such as redirects can't be handled in the intent table, via switch in node-red?
     if intent == "GetStory" and (number[0] in number):
         url = config['main']['intent_server'] + "/memory/" + str(number[0]) + "/speak"
-        #print ('url is: ' + url)
         return RedirectResponse(url)    
     
     # intents are the options see: https://stackoverflow.com/questions/17881409/whats-an-alternative-to-if-elif-statements-in-python
     intents = {
 
         'TakePhoto'      : run_photo_command,
-      #  'GetTime'        : run_time_command,
-      #  'TellStory'      : print("tell story found"),   
-      #  'Associate'      : print("associate photo and story found"),
+      #  'GetTime'       : run_time_command,
+      #  'Associate'     : print("associate photo and story found"),
         'RecordStory'    : run_record_command,
         'RecordVideo'    : run_video_command,
         'KillVideo'      : run_kill_video_command,  
         'LabelVideo'     : run_label_video_command,       
         'SlicePie'       : run_pie,
         'SearchPage'     : run_search_command,
-        'LetsGo'         : fetch_privacy,
-        'SearchMemories' : run_search_memories, 
-        'Mosaic'         : run_mosaic_command     
+        'LetsGo'         : run_front_page,            
+      # 'SearchMemories' : run_search_memories,
+        'Mosaic'         : run_mosaic_command,
+       # moved to face_unlock.py face unlock sign in as a registered user 
+       # 'Unlock'         : run_face_unlock,
+       # sign out, actuall sign in signs out anyone else 
+        'Lock'           : run_sign_out    
 
     }
     
@@ -130,8 +139,6 @@ async def info(info : Request):
         intents[intent](number,polite)
     else:
         mu.curl_speak(config['en_prompts']['nope'])
-
-    logging.debug('--->is when this event was logged.')
     
     #FIXME: Not quite sure what purpose this serves?     
     return {
@@ -146,6 +153,7 @@ async def info(info : Request):
 def run_photo_command(number,please):
         
     # FIXME: nice to have websocket notification
+    global user
     logging.debug('photo token' + my_env['REPLICATE_API_TOKEN'])
     result = ''
     try:
@@ -156,13 +164,13 @@ def run_photo_command(number,please):
         
     (text, file_path) = result.split("|")
     file_path.rstrip()
-    logging.debug('picture return' + ' ' + text + ' ' + file_path)
+    logging.debug('picture return' + ' ' + text + ' |' + file_path)
     
     unix_time = int(datetime.datetime.now().timestamp())
     description = text[0:30]
-    
+    logging.debug('user id' + app.user[0])
     cur = con.cursor()
-    cur.execute("INSERT INTO memories (description, text, file_path, unix_time, public, owner, type) values (?, ?,?, ?, ?, ?,? )", (text, text, file_path, unix_time, 0, 1, 'photo'))
+    cur.execute("INSERT INTO memories (description, text, file_path, unix_time, public, owner, type) values (?, ?,?, ?, ?, ?,? )", (text, text, file_path, unix_time, 0, user[0], 'photo'))
     con.commit()    
     return 
 
@@ -194,7 +202,6 @@ def run_video_command(number,please):
     
     print("record video found") if config['main']['debug'] else None
     
-    #result = subprocess.check_output(config['main']['video_program'], stderr=subprocess.DEVNULL)
     result = subprocess.check_output(config['main']['video_program'], stderr=subprocess.STDOUT)
     result_string = result.decode('utf-8')
 
@@ -219,7 +226,6 @@ def run_video_command(number,please):
 def run_kill_video_command(number,please):
     
     print("kill video record found") if config['main']['debug'] else None
-    
     com_array = config['main']['kill_video_command'].split()
     subprocess.call(com_array,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
     return
@@ -229,7 +235,6 @@ def run_kill_video_command(number,please):
 # FIXME: label anything in database, extend this
    
 def run_label_video_command(number,please):
-    
     logging.debug("label video found " + str(number[0]))
     
     cur = con.cursor()
@@ -267,13 +272,12 @@ def run_mosaic_command(number,please):
     subprocess.call(mosaic_array, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     mu.open_url('static/mosaic.html')
     return
-    
-    
+
+
 # skeletion get search page, see https://community.rhasspy.org/t/recognized-untrain-sentences-words/465/5
 # discussion of wildcards
 
 def run_search_command(number,please): 
-
     return
 
 def run_pie(number,please):
@@ -283,31 +287,25 @@ def run_pie(number,please):
     else:
         mu.curl_speak(config['en_prompts']['say_please'])
     return
-
-#FIXME: Oh boy, what a problem for something v. simple!
-# make general!
     
 def run_front_page(number,please):
+    mu.declare_mema_health()
+    mu.curl_speak(config['en_prompts']['ok_going'])
+    # no face unlock sign in as a guest
+    #logging.debug('in front page app user is')
+    #logging.debug(app.user)
 
-    mu.curl_speak(config['en_prompts']['ok_going'])    
-    mu.open_url('static/privacy.html')   
+    mu.open_url('/memories.html')   
     return        
 
 
 #FIXME: Probably merge this with memories fetch? Don't let these one page calls multiply?
 @app.get("/privacy.html")
 def fetch_privacy(request: Request, response_class=HTMLResponse ):
-    mema_health = mu.system_health()
-    if mema_health['wifi'] == 'dotgreen':
-       mu.curl_speak('the_wifi_network_is_connected')
-    else:
-       mu.curl_speak('the_wifi_network_is_off')
-    if config['main']['use_external_ai'] == 'yes':
-       mu.curl_speak('external_services_for_labelling_and_transcription_are_on')
-    else:
-        mu.curl_speak('external_services_are_off')
-    mu.open_url('static/privacy.html')   
- 
+    mu.declare_mema_health()
+    mu.open_url('static/privacy.html')
+    return
+
 def run_search_memories(number,please):
     print('in search memories')
     mu.curl_speak('found_a_set_of_memories')
@@ -321,37 +319,38 @@ async def get_wordcloud():
 
 
 # list of memories to screen    
+# FIXME: Join later
 
 @app.get("/memories.html")
 def fetch_all(request: Request, response_class=HTMLResponse ):
     cur = con.cursor()
-    # result = cur.execute("SELECT * FROM memories")
     result = cur.execute("select memory_id, description, file_path, strftime('%d-%m-%Y %H:%M', unix_time, 'unixepoch') as date, public, type from memories")
     results = result.fetchall()
     cur.close()
-    #wordcloud() not here, in a cron
+    app.user = mu.get_current_user() 
+    print('in memories app user is')
+    print(app.user)
+
+    #FIXME: wordcloud() not here, in a cronon
     return templates.TemplateResponse(
         "list.html",
-        {"request": request, "results" :results, "mema_health": mu.system_health()}
+        {"request": request, "results" :results, "mema_health": mu.system_health(), "user": app.user}
     )
 
 
 # get memory to screen
-
 @app.get("/memory/{id}")
 def fetch_data(request: Request, id: int):
     cur = con.cursor()
     result = cur.execute("SELECT * FROM memories WHERE memory_id={}".format(str(id)))
     field = result.fetchone()
-    field[3].rstrip()
     return templates.TemplateResponse(
         "memory.html",
         {"request": request,  "field": field}
     )
 
-# ok ugly should be get, but problem with FastApi see: 
+#FIXME: ok ugly should be get, but problem with FastApi see: 
 # https://stackoverflow.com/questions/62119138/how-to-do-a-post-redirect-get-prg-in-fastapi
-
 @app.post("/memory/{id}/speak")
 def fetch_data(id: int):
     
@@ -370,8 +369,7 @@ def fetch_data(id: int):
         mu.curl_speak(config['en_prompts']['sorry'])
     return fields
 
-# web socket
-
+# web socket unused at present, put small messages on front screen
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()

@@ -10,38 +10,69 @@ import datetime
 from configobj import ConfigObj
 from fastapi import WebSocket
 
+import sqlite3
+
 config = ConfigObj('etc/mema.ini')
 logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
 
-'''
-#FIXME: is this used anywhere right now?
-class run_subprocess(th.Thread):
-    def __init__(self,command):
-        self.stdout = None
-        self.stderr = None
-        th.Thread.__init__(self)
-        self.command = command
 
-    def run(self):
-        p = subprocess.call(self.command, shell=True)
-        #self.stdout, self.stderr = p.communicate()
- 
-#FIXME: Probably don't need this either?    
-def demote(user_uid, user_gid):
-    def result():
-        os.setgid(user_gid)
-        os.setuid(user_uid)
-    return result
-'''
+# separate out, need for both face unlock and direct path
+def declare_mema_health():
+    mema_health = system_health()
+    if mema_health['wifi'] == 'dotgreen':
+       curl_speak('the_wifi_network_is_connected')
+    else:
+       curl_speak('the_wifi_network_is_off')
+    if config['main']['use_external_ai'] == 'yes':
+       curl_speak('external_services_for_labels_and_transcription_are_on')
+    else:
+        curl_speak('external_services_are_off')
+
+# separate from unlock, since we want to sign in the guest user too
+# without going through the face_unlock    
+def database_sign_in(first_name,last_name):
+    con = sqlite3.connect(config['main']['db'], check_same_thread=False)
+    unix_time = int(datetime.datetime.now().timestamp())
+    # remove any previous or 'zombie' sign ins
+    cur = con.cursor()   
+    cur.execute(("update contacts set logon = ? where logon >= ?"),(None,0))
+    #FIXME: sign in named holder, can be guest, what to do if not found?
+    result = cur.execute(("update contacts set logon = ? where first_name = ? and last_name = ?"),(unix_time,first_name,last_name))
+    users = cur.execute("select * from contacts where logon > 0")
+    user = users.fetchone()
+    cur.close()
+    con.commit()
+    con.close()
+    return user
+    
+    
+def get_current_user():
+    con = sqlite3.connect(config['main']['db'], check_same_thread=False)
+    cur = con.cursor()    
+    users = cur.execute("select * from contacts where logon > 0")
+    # do this
+    user = users.fetchone()
+    cur.close()
+    con.close()
+    return user        
+
+
+def run_sign_out(number,please):
+    con = sqlite3.connect(config['main']['db'], check_same_thread=False)
+    curl_speak('thank_you_signing_out_now')
+    unix_time = int(datetime.datetime.now().timestamp())
+    cur = con.cursor()
+    result = cur.execute(("update contacts set logon = ? where logon >= ?"),(None,0))
+    cur.close()
+    con.commit()
+    con.close()
+    return
+
 
 def open_url(page):
     try:
         url = config['main']['intent_server'] + '/' + page
         open_command = r'jaro  {}'.format(url)
-        logging.debug('in jaro command ' + open_command)
-        #open_command = 'chromium-browser --display=:0 --kiosk --incognito --window-position=0,0 https://reelyactive.github.io/diy/pi-kiosk/'
-        #subprocess.run([open_command, number[0] ],  stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
-        #subprocess.run(open_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         subprocess.Popen(open_command,shell = True)   
     except subprocess.CalledProcessError as e:
         logging.debug('jaro open_url command error' + open_command)
@@ -96,7 +127,6 @@ def get_env(env_file):
     with open(env_file, 'r') as f:
         for line in f:
             items = line.split('=')
-            #logging.debug(items)
             key, value = items[0], items[1].rstrip()
             my_env[key] = value
     return my_env
@@ -145,7 +175,7 @@ def system_health():
     # test whether wifi is up, make a long line rather than use complex regex!
     t = Path('/proc/net/wireless').read_text()
     t = ''.join(t.splitlines())
-    m = re.search(r'wl', t)
+    m = re.search(r'wlp', t)
     #print('m is ', m, t)  
     if m:
         mema_health['wifi'] = 'dotgreen'

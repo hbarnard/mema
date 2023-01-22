@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+
+# things to be added 21/1/2023
+# npm install node-red-contrib-pythonshell
+# python modules for face unlock
+# 
+#
+
 echo  '*-------------------------------------------------------------------------------*'
 echo 'this will try to install mema3, control-c to abort, sleeping for 10 seconds'
 echo 'make sure that the system date on the Pi is correct otherwise certs are invalid'
@@ -20,9 +27,6 @@ mkdir static/media/rec
 mkdir static/media/vid
 mkdir static/media/pic
 
-#FIXME: not the same for laptop
-cp associations /home/pi/.config
-
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing packages'
 echo  '*-------------------------------------------------------------------------------*'
@@ -33,8 +37,7 @@ apt install python3-matplotlib python3-tk
 apt install mosquitto mosquitto-dev
 apt install sqlite3
 # may or may not need ffmpeg for sample conversion
-apt install ffmpeg portaudio portaudio19-dev fswebcam curl python3-pyaudio guile2.0 chromium-browser imagemagick -y
-#FIXME: is this correct for docker, hard install?
+apt install ffmpeg portaudio portaudio19-dev fswebcam curl python3-pyaudio guile2.0
 sudo apt install docker.io
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing mema3'
@@ -47,13 +50,13 @@ cp etc/systemd/intent_server.service /etc/systemd/system/
 cp etc/mema_pi.ini etc/mema.ini
 systemctl daemon-reload
 echo  '*-------------------------------------------------------------------------------*'
-echo 'trying to start containers, these run as root'
+echo 'trying to start containers'
 usermod -aG docker pi
 docker run -d --network host --name mema_rhasspy --restart unless-stopped -v "$HOME/.config/rhasspy/profiles:/profiles" -v "/etc/localtime:/etc/localtime:ro" --device /dev/snd:/dev/snd rhasspy/rhasspy --user-profiles /profiles --profile en
 sudo docker run --network host -d --restart unless-stopped --name mema_mimic3 -v "${HOME}/.local/share/mycroft/mimic3:/home/mimic3/.local/share/mycroft/mimic3" 'mycroftai/mimic3'
 docker run -d --network host -v node_red_data:/data --restart unless-stopped --name mema_nodered nodered/node-red
 echo  '*-------------------------------------------------------------------------------*'
-echo 'starting intent server, this should run as pi on the pi otherwise modify for the user'
+echo 'starting intent server'
 systemctl start intent_server
 echo  '*-------------------------------------------------------------------------------*'
 echo 'almost done!'

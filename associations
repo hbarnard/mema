@@ -1,0 +1,4 @@
+(assoc
+  #:pattern "^http?://.*"
+  #:program "DISPLAY=:0  chromium-browser  %f"
+)
