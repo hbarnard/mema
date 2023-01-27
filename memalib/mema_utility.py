@@ -12,13 +12,21 @@ from fastapi import WebSocket
 
 import sqlite3
 
-config = ConfigObj('etc/mema.ini')
-logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
-
+#FIXME: started as systemd service, so needs full path?
+'''
+try:
+    config = ConfigObj('etc/mema.ini')
+    my_env = mu.get_env(config['main']['env_file'])
+    #logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
+    #logging.debug('in utility')  
+    #print(config)
+except:
+    print('config file error in utility')
+'''
 
 # separate out, need for both face unlock and direct path
-def declare_mema_health():
-    mema_health = system_health()
+def declare_mema_health(config):
+    mema_health = system_health(config)
     if mema_health['wifi'] == 'dotgreen':
        curl_speak('the_wifi_network_is_connected')
     else:
@@ -30,7 +38,7 @@ def declare_mema_health():
 
 # separate from unlock, since we want to sign in the guest user too
 # without going through the face_unlock    
-def database_sign_in(first_name,last_name):
+def database_sign_in(first_name,last_name,config):
     con = sqlite3.connect(config['main']['db'], check_same_thread=False)
     unix_time = int(datetime.datetime.now().timestamp())
     # remove any previous or 'zombie' sign ins
@@ -46,7 +54,7 @@ def database_sign_in(first_name,last_name):
     return user
     
     
-def get_current_user():
+def get_current_user(config):
     con = sqlite3.connect(config['main']['db'], check_same_thread=False)
     cur = con.cursor()    
     users = cur.execute("select * from contacts where logon > 0")
@@ -57,7 +65,7 @@ def get_current_user():
     return user        
 
 
-def run_sign_out(number,please):
+def run_sign_out(number,please,config):
     con = sqlite3.connect(config['main']['db'], check_same_thread=False)
     curl_speak('thank_you_signing_out_now')
     unix_time = int(datetime.datetime.now().timestamp())
@@ -69,20 +77,20 @@ def run_sign_out(number,please):
     return
 
 
-def open_url(page):
+def open_url(page,config):
     try:
         url = config['main']['intent_server'] + '/' + page
         open_command = r'jaro  {}'.format(url)
         subprocess.Popen(open_command,shell = True)   
     except subprocess.CalledProcessError as e:
-        logging.debug('jaro open_url command error' + open_command)
+        #logging.debug('jaro open_url command error' + open_command)
         raise RuntimeError("command '{}' return here with error (code {}): {}".format(e.cmd, e.returncode, e.output))
     return        
 
 
 #FIXME: Need this for xdg-open, maybe theres another simpler way?
 # see also: https://stackoverflow.com/questions/61302291/python-subprocess-popen-execute-as-different-user v, similar
-        
+'''        
 def exec_cmd(username,command):
     # get user info from username
     pw_record = pwd.getpwnam(username)
@@ -99,12 +107,13 @@ def exec_cmd(username,command):
                               preexec_fn=demote(user_uid, user_gid),
                               stdout=subprocess.PIPE)
     return
+'''
 
 
 # spoken prompts without going back into node red, prompts are word_word_word in mema.ini
 
 def curl_speak(phrase):
-    logging.debug(phrase)
+    #logging.debug(phrase)
     cl = '''curl -s --header "Content-Type: text/utf-8"   --request POST  --data '{speech}'   http://localhost:12101/api/text-to-speech > /dev/null'''.format(speech = phrase)
     cl_array = cl.split()
     subprocess.call(cl_array,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
@@ -112,7 +121,7 @@ def curl_speak(phrase):
 
 
 def curl_get(url):
-    logging.debug(url)
+    #logging.debug(url)
     cl = '''curl -s {url}'''
     cl_array = cl.split()
     subprocess.call(cl_array,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
@@ -145,7 +154,7 @@ def docker_control(command,instance_name):
 
 #FIXME: not used currently, but useful
 
-def system_health():
+def system_health(config):
 
     buffer = BytesIO()
     c = pycurl.Curl()

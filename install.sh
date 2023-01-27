@@ -4,7 +4,7 @@
 # npm install node-red-contrib-pythonshell
 # python modules for face unlock
 # 
-#
+# timesync doesn't work hence ntpspec
 
 echo  '*-------------------------------------------------------------------------------*'
 echo 'this will try to install mema3, control-c to abort, sleeping for 10 seconds'
@@ -35,7 +35,7 @@ apt install python3-numpy
 apt install python3-pycurl
 apt install python3-matplotlib python3-tk
 apt install mosquitto mosquitto-dev
-apt install sqlite3
+apt install sqlite3 ntpspec
 # may or may not need ffmpeg for sample conversion
 apt install ffmpeg portaudio portaudio19-dev fswebcam curl python3-pyaudio guile2.0
 sudo apt install docker.io

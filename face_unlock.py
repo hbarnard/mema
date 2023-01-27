@@ -37,11 +37,13 @@ def on_message(client, userdata, msg):
     intent_data =json.loads(decoded_message)
     #logging.debug('intent name is ' + intent_data['intent']['intentName']) 
     if intent_data['intent']['intentName'] == 'Unlock':
+        #logging.debug('to here')
         face_unlock(userdata)
     elif intent_data['intent']['intentName'] == 'Lock':
         logging.debug('intent name is ' + intent_data['intent']['intentName']) 
-        mu.run_sign_out(None,None) #FIXME: need to fix some of these function signatues
-        mu.open_url('static/offline.html')
+        #mu.run_sign_out(None,None) #FIXME: need to fix some of these function signatures
+        mu.curl_speak(userdata['en_prompts']['bye_bye'])
+        mu.open_url('static/offline.html', userdata)
     #client.disconnect()
 
 
@@ -55,7 +57,7 @@ def face_unlock(config):
     known_face_count = 0
     unknown_face_count = 0
 
-    with open("face_data/trained_knn_model.clf", 'rb') as f:
+    with open("/home/hbarnard/mema/face_data/trained_knn_model.clf", 'rb') as f:
         knn_clf = pickle.load(f)
         
     cap = cv.VideoCapture(0)
@@ -102,34 +104,34 @@ def face_unlock(config):
                         if known_face_count == 10:
                             (first_name, last_name) = name.split()
                             mu.curl_speak('Hello_' + first_name)
-                            mu.database_sign_in(first_name, last_name)
-                            mu.declare_mema_health()
+                            mu.database_sign_in(first_name, last_name, config)
+                            mu.declare_mema_health(config)
                             mu.curl_speak(config['en_prompts']['ok_going'])
                             cap.release()
                             cv.destroyAllWindows()
                             # Doesn't pass through privacy because, in principle onboarded
-                            mu.open_url('memories.html')
+                            mu.open_url('memories.html',config)
                     else:
                         unknown_face_count += 1
     
                         cv.imshow(title,frame)
                         cv.setWindowProperty(title, cv.WND_PROP_TOPMOST, 1)                                           
                         cv.waitKey(20)
-                        if unknown_face_count == 10:
+                        if unknown_face_count == 30:
                             mu.curl_speak('Hello_honored_guest')
-                            mu.database_sign_in('Guest', 'Account')
-                            mu.declare_mema_health()
+                            mu.database_sign_in('Guest', 'Account',config)
+                            mu.declare_mema_health(config)
                             mu.curl_speak(config['en_prompts']['ok_going'])
                             cap.release()
                             cv.destroyAllWindows()
                             # Passes through privacy, since guest
-                            mu.open_url('static/privacy.html')
+                            mu.open_url('static/privacy.html',config)
                         continue
 
                 else:
                     continue
                     
-        logging.debug('reach here?')
+        #logging.debug('reach here?')
         mu.curl_speak('Sorry_no_human_faces_found')
         # When everything done, release the capture
         cap.release()
@@ -138,8 +140,14 @@ def face_unlock(config):
 
 
 def main():
+    #FIXME: started as systemd service, so needs full path?
+    try:
+        config = ConfigObj('/home/hbarnard/mema/etc/mema.ini')
+        #print(config)
+    except:
+        print('config load failed in take_picture.py')
     
-    config = ConfigObj('etc/mema.ini')
+    
     logging.basicConfig(filename=config['main']['logfile_name'], format='%(asctime)s %(message)s', encoding='utf-8', level=logging.DEBUG)
     
     client = mqtt.Client(userdata=config)
