@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS `text_search_data` (
 	`block`	BLOB,
 	PRIMARY KEY(`id`)
 );
+INSERT INTO `text_search_data` (id,block) VALUES (1,'');
+INSERT INTO `text_search_data` (id,block) VALUES (10,X'00000000000000');
 DROP TABLE IF EXISTS `text_search_content`;
 CREATE TABLE IF NOT EXISTS `text_search_content` (
 	`id`	INTEGER,
@@ -31,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `text_search_config` (
 	`v`	TEXT,
 	PRIMARY KEY(`k`)
 ) WITHOUT ROWID;
+INSERT INTO `text_search_config` (k,v) VALUES ('version',4);
 DROP TABLE IF EXISTS `text_search`;
 CREATE VIRTUAL TABLE text_search using fts5(memory_id,free_text);
 DROP TABLE IF EXISTS `memories`;
@@ -45,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `memories` (
 	`type`	text,
 	PRIMARY KEY(`memory_id`)
 );
+
 DROP TABLE IF EXISTS `contacts`;
 CREATE TABLE IF NOT EXISTS `contacts` (
 	`contact_id`	INTEGER,

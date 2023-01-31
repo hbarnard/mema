@@ -57,7 +57,7 @@ def face_unlock(config):
     known_face_count = 0
     unknown_face_count = 0
 
-    with open("/home/hbarnard/mema/face_data/trained_knn_model.clf", 'rb') as f:
+    with open("/home/pi/mema/face_data/trained_knn_model.clf", 'rb') as f:
         knn_clf = pickle.load(f)
         
     cap = cv.VideoCapture(0)
@@ -142,7 +142,7 @@ def face_unlock(config):
 def main():
     #FIXME: started as systemd service, so needs full path?
     try:
-        config = ConfigObj('/home/hbarnard/mema/etc/mema.ini')
+        config = ConfigObj('/home/pi/mema/etc/mema.ini')
         #print(config)
     except:
         print('config load failed in take_picture.py')
