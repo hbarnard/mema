@@ -63,11 +63,13 @@ def face_unlock(config):
     cap = cv.VideoCapture(0)
     #cv2.setWindowProperty(WindowName,cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
     if not cap.isOpened():
+        log.debugging('no image')
         exit()
     while True:
         # Capture frame-by-frame
         ret, frame = cap.read()
         X_face_locations = face_recognition.face_locations(frame,1,model="hog")
+        #X_face_locations = face_recognition.face_locations(frame,no_of_times_to_upsample=1,model="cnn")
         #logging.debug(X_face_locations)
         title = 'Mema3 Unlock'
         

@@ -1,0 +1,23 @@
+# note that some packages are supplied in install.sh via the packaging system
+configobj
+datetime
+fastapi
+pathlib
+# only need replicate if using replicate.ai
+replicate
+sqlite3
+time
+webbrowser
+wordcloud
+gunicorn
+uvicorn[standard]
+paho-mqtt
+imutils
+face_recognition
+dlib
+pickle
+# package?
+opencv-python
+
+
+

@@ -2,49 +2,36 @@
     "dialogue": {
         "system": "rhasspy"
     },
-    "handle": {
-        "remote": {
-            "url": "http://localhost:8000"
-        }
-    },
     "intent": {
         "system": "fsticuffs"
     },
     "microphone": {
-        "pyaudio": {
-            "device": "1"
+        "arecord": {
+            "device": "default"
         },
-        "system": "pyaudio"
+        "pyaudio": {
+            "device": "0"
+        },
+        "system": "arecord"
     },
     "mqtt": {
-        "enabled": "true",
-        "host": "10.0.0.76",
-        "site_id": "mema01"
+        "enabled": "true"
     },
     "sounds": {
-        "aplay": {
-            "device": "default:CARD=seeed2micvoicec"
-        },
         "system": "aplay"
     },
     "speech_to_text": {
+        "kaldi": {
+            "allow_unknown_words": true
+        },
         "system": "kaldi"
     },
     "text_to_speech": {
         "marytts": {
-            "locale": "en-GB",
-            "url": "http://10.0.0.76:59125/process",
             "voice": "en_UK/apope_low"
-        },
-        "nanotts": {
-            "language": "en-GB"
         },
         "system": "marytts"
     },
     "wake": {
-        "porcupine": {
-            "keyword_path": "porcupine_raspberry-pi.ppn"
-        },
         "system": "porcupine"
     }
-}
