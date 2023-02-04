@@ -8,6 +8,7 @@ replicate
 sqlite3
 time
 webbrowser
+websockets
 wordcloud
 gunicorn
 uvicorn[standard]
