@@ -38,6 +38,7 @@ apt install python3-matplotlib python3-tk
 apt install mosquitto mosquitto-dev
 apt install sqlite3 
 apt install ntpsec
+apt install cmake
 # may or may not need ffmpeg for sample conversion
 apt install ffmpeg 
 apt install portaudio portaudio19-dev 
@@ -83,6 +84,8 @@ docker run -d --network host -v node_red_data:/data --restart unless-stopped --n
 
 echo 'copying rough rhasspy profile to /root/.config/rhasspy/profiles/en'
 cp rhasspy/profiles/en/profile.json /root/.config/rhasspy/profiles/en
+echo 'copying sentences.ini to /root/.config/rhasspy/profiles/en'
+cp rhasspy/profiles/en/sentences.ini /root/.config/rhasspy/profiles/en
 
 echo  '*-------------------------------------------------------------------------------*'
 echo 'trying to start systemd servers'
