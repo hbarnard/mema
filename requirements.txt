@@ -1,0 +1,77 @@
+#FIXME: some of this will be built ins, needs review January 2021
+# use pip freeze to have a look
+aiocontextvars 
+anyio
+asgiref 
+asn1crypto 
+attr
+attrs
+board 
+certifi
+chardet
+charset-normalizer 
+click 
+configobj 
+contextlib2 
+contextvars 
+docopt 
+docutils 
+fastapi 
+greenlet
+gruut-ipa 
+gunicorn 
+h11 
+httptools 
+idna 
+immutables 
+importlib-metadata 
+importlib-resources 
+jinja2 
+jmespath 
+json
+numpy-camera 
+opencv-camera 
+opencv-python 
+packaging 
+pafy 
+paho_mqtt
+Pillow-PIL 
+pip 
+pycrypto 
+pydantic
+pygame 
+pyparsing 
+python-apt
+python-dateutil 
+python-dotenv 
+python-vlc 
+pytz 
+pyxdg 
+PyYAML
+#FIXME: for external ai requests only
+replicate
+# 
+requests 
+Rx
+SecretStorage 
+setuptools 
+simple-term-menu 
+simplejson 
+six 
+slurm 
+SQLAlchemy 
+tqdm 
+typing 
+typing-extensions
+# probably not urllib?
+urllib3 >= 1.26.9
+#
+uvicorn >= 0.16.0
+uvloop >= 0.14.0
+watchgod >= 0.7
+websockets >= 9.1
+wheel >= 0.30.0
+#FIXME: may not need this, d3 instead?
+wordcloud >= 1.8.2.2
+yarg >= 0.1.9
+zipp >= 3.6.0

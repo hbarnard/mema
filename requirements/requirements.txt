@@ -5,7 +5,7 @@ fastapi
 pathlib
 # only need replicate if using replicate.ai
 replicate
-sqlite3
+#sqlite3
 time
 webbrowser
 websockets
