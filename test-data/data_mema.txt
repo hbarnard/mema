@@ -1,0 +1,15 @@
+CREATE (n: Mem {id:1,description:"unlabelled still image",text:"unlabelled still image",file_path:"static/media/pic/1674764283.jpg",unix_time:1674764288,public:0,owner:2,type:"photo"});
+CREATE (n: Mem {id:2,description:"unlabelled video",text:"unlabelled video recording",file_path:"static/media/vid/1674764311.mp4",unix_time:1674764357,public:0,owner:2,type:"video"});
+CREATE (n: Mem {id:3,description:" This is a test story, this is",text:" This is a test story, this is a test story, this will be transcribed with luck.  This is a test story, bye bye.",file_path:"static/media/rec/1674764369.wav",unix_time:1674764399,public:0,owner:2,type:"text"});
+CREATE (n: Mem {id:4,description:"unlabelled still image",text:"unlabelled still image",file_path:"static/media/pic/1674817548.jpg",unix_time:1674817554,public:0,owner:1,type:"photo"});
+CREATE (n: Mem {id:5,description:" This is a test story, this is",text:" This is a test story, this is another test story.  Why don't you try and put in a word?  Here is a story.  laughs",file_path:"static/media/rec/1674817902.wav",unix_time:1674817936,public:0,owner:1,type:"text"});
+CREATE (n: Mem {id:6,description:"unlabelled video",text:"unlabelled video recording",file_path:"static/media/vid/1674818187.mp4",unix_time:1674818233,public:0,owner:1,type:"video"});
+CREATE (n: Mem {id:7,description:"unlabelled still image",text:"unlabelled still image",file_path:"static/media/pic/1675249416.jpg",unix_time:1675249422,public:0,owner:1,type:"photo"});
+CREATE (n: Mem {id:8,description:"unlabelled video",text:"unlabelled video recording",file_path:"static/media/vid/1675249449.mp4",unix_time:1675249495,public:0,owner:1,type:"video"});
+CREATE (n: Mem {id:9,description:" This is a test story.  Off yo",text:" This is a test story.  Off you go, Algo.  Antisocial media.  I'm just reading a couple of things from a price...",file_path:"static/media/rec/1675249506.wav",unix_time:1675249537,public:0,owner:1,type:"text"});
+CREATE (n: Mem {id:10,description:"unlabelled still image",text:"unlabelled still image",file_path:"static/media/pic/1675338116.jpg",unix_time:1675338122,public:0,owner:2,type:"photo"});
+CREATE (n: Mem {id:11,description:" on the box. Blah blah blah bl",text:" on the box. Blah blah blah blah this is a story etc. This is another story.  We're all here too in this story.",file_path:"static/media/rec/1675338153.wav",unix_time:1675338184,public:0,owner:2,type:"text"});
+CREATE (n: Mem {id:12,description:"unlabelled video",text:"unlabelled video recording",file_path:"static/media/vid/1675338238.mp4",unix_time:1675338284,public:0,owner:2,type:"video"});
+CREATE (n: User {id:1,first_name:"Hugh",last_name:"Barnard",email:"hugh.barnard@gmail.com",phone:"07779159452",logon:null});
+CREATE (n: User {id:2,first_name:"Guest",last_name:"Account",email:"",phone:"",logon:1675338034});
+MATCH (a:Mem),(b:User) WHERE a.owner = b.id CREATE (a)-[r:OWNED_BY]->(b);
