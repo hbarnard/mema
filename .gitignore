@@ -6,4 +6,5 @@ static/media/pic/*
 static/script/jquery-3.6.3.min.js
 static/script/DataTables/datatables.min.css
 static/script/DataTables/datatables.min.js
+*pycache*
 
