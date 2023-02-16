@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+#FIXME: As of 15/2/2023 this is still a little rough.
+
 # ffmpeg -y  -f v4l2 -i /dev/video0 -r 25  -t 60 /home/hbarnard/Videos/face.mp4
 # import the necessary packages
 from imutils import face_utils
@@ -11,6 +13,7 @@ import cv2
 import h5py
 import _pickle as cPickle
 
+import time
 import os
 
 # construct the argument parser and parse the arguments
@@ -21,12 +24,22 @@ args = vars(ap.parse_args())
 number=0;
 frame_count=0
 detector = dlib.get_frontal_face_detector()
-print("enter the person name")
+print('''
+This will need a good source of light, sunlight of bright
+artifical. Look directly at the camera, top, mid screen
+on laptop.
+
+Process will start in five seconds.
+''')
+
+time.sleep(5)
+
+print("Enter first name last name:")
 name = input()
 folder_name="dataset/"+name
 
 if os.path.exists(folder_name):
-    print ("Folder exist")
+    print (name + " folder already exists")
 else:
     os.mkdir(folder_name)
 
@@ -44,7 +57,7 @@ while True:
     
     if frame_count % 5 == 0:
 
-        #print("keyframe")
+        print("keyframe")
 
         # grab the current frame
         (grabbed, image) = camera.read()
@@ -85,6 +98,8 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
+print("please use ./face_train.py to train the classifier now")
+print("make sure that the user is in the database too")
 # clean up the camera and close any open windows
 camera.release()
 cv2.destroyAllWindows()

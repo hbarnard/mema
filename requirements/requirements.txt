@@ -3,6 +3,7 @@ configobj
 datetime
 fastapi
 pathlib
+h5py
 # only need replicate if using replicate.ai
 replicate
 #sqlite3
@@ -17,6 +18,8 @@ imutils
 face_recognition
 dlib
 pickle
+# apparently unpickling sklearn?
+scikit-learn
 # package?
 opencv-python
 

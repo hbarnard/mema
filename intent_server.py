@@ -32,7 +32,6 @@ import os
 import re
 import memalib.mema_utility as mu
 
-#FIXME: currently this is a hard install, look at https://github.com/amueller/word_cloud and stackoverflow for help
 from wordcloud import WordCloud
 import sqlite3
 import logging
@@ -48,9 +47,11 @@ templates = Jinja2Templates(directory="templates/en")
 
 api_router = APIRouter()
 
-# logged on user when filled user[1], user[2] for name
+#FIXME: logged on user when filled user[1], user[2] for name
 # user[0] for id, see: https://github.com/tiangolo/fastapi/issues/592
-app.user = ()
+# crash when not filled in, so guest from beginning at the moment 15/2/2023
+
+app.user = ('Honoured','Guest')
 pi  = False 
 my_env = {}
 # config = ()

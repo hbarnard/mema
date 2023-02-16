@@ -3,6 +3,10 @@
 # things to be added 21/1/2023
 # npm install node-red-contrib-pythonshell
 # python modules for face unlock
+#
+# 15/2/2023
+# we're assuming mema user now with root privileges via visudo?
+# this may need some adjustment too
 # 
 # FIXME timesync doesn't work hence ntpspec/clock pi problems 'anyway'
 
@@ -21,11 +25,14 @@ echo  '*------------------------------------------------------------------------
 echo 'making media directories'
 echo  '*-------------------------------------------------------------------------------*'
 
-mkdir static/media/mos
-mkdir static/media/tmp
-mkdir static/media/rec
-mkdir static/media/vid
-mkdir static/media/pic
+# -p just in case
+mkdir -p static/media/mos
+mkdir -p static/media/tmp
+mkdir -p static/media/rec
+mkdir -p static/media/vid
+mkdir -p static/media/pic
+mkdir -p var/log/mema
+mkdir -p face_onboarding/dataset
 
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing packages'
@@ -39,12 +46,22 @@ apt install mosquitto mosquitto-dev
 apt install sqlite3 
 apt install ntpsec
 apt install cmake
+
+# face sign in only, are these really necessary?
+apt install libx11-dev
+apt install libgtk-3-dev
+
 # may or may not need ffmpeg for sample conversion
-apt install ffmpeg 
-apt install portaudio portaudio19-dev 
+apt install ffmpeg
+#FIXME: no portaudio package?
+apt install portaudio19-dev 
 #FIXME: fswebcam is only used on the laptop, libcamera on the pi
 apt install fswebcam 
-apt install curl 
+apt install curl
+#FIXME: not part of the main software, but v. useful when testing
+apt install sqlitebrowser
+
+apt install chromium-browser
 # FIXME: is this guile2.0 or 3.0 either will 'work'
 apt install guile3.0
 sudo apt install docker.io
@@ -76,16 +93,21 @@ else
 fi
 
 echo  '*-------------------------------------------------------------------------------*'
-echo 'trying to start containers'
-usermod -aG docker pi
+echo 'trying to start containers mema_rhasspy, mema_nodered, mema_mimic3'
+
+#FIXME: pi should use mema user now?
+#usermod -aG docker pi
 docker run -d --network host --name mema_rhasspy --restart unless-stopped -v "$HOME/.config/rhasspy/profiles:/profiles" -v "/etc/localtime:/etc/localtime:ro" --device /dev/snd:/dev/snd rhasspy/rhasspy --user-profiles /profiles --profile en
 docker run --network host -d --restart unless-stopped --name mema_mimic3 -v "${HOME}/.local/share/mycroft/mimic3:/home/mimic3/.local/share/mycroft/mimic3" 'mycroftai/mimic3'
 docker run -d --network host -v node_red_data:/data --restart unless-stopped --name mema_nodered nodered/node-red
 
 echo 'copying rough rhasspy profile to /root/.config/rhasspy/profiles/en'
-cp rhasspy/profiles/en/profile.json /root/.config/rhasspy/profiles/en
+cp rhasspy/profiles/en/profile.json /home/mema/.config/rhasspy/profiles/en
 echo 'copying sentences.ini to /root/.config/rhasspy/profiles/en'
-cp rhasspy/profiles/en/sentences.ini /root/.config/rhasspy/profiles/en
+cp rhasspy/profiles/en/sentences.ini /home/mema/.config/rhasspy/profiles/en
+
+#FIXME: The only thing in this should be the replicate API token
+cp env /home/mema/.env
 
 echo  '*-------------------------------------------------------------------------------*'
 echo 'trying to start systemd servers'
@@ -100,6 +122,6 @@ echo 'trying to install the binary for jaro at https://github.com/isamert/jaro.g
 git clone https://github.com/isamert/jaro.git
 cp jaro/jaro /usr/local/bin
 
-echo 'rhasspy will need further set up at http://localhost:12101'
+echo 'rhasspy will (probably) need further manual set up at http://localhost:12101'
 echo 'please reboot now'
 exit 0
