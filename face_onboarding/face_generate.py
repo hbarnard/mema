@@ -36,7 +36,9 @@ time.sleep(5)
 
 print("Enter first name last name:")
 name = input()
-folder_name="dataset/"+name
+
+#FIXME: where is face_generate run from?
+folder_name="../dataset/"+name
 
 if os.path.exists(folder_name):
     print (name + " folder already exists")

@@ -5,8 +5,8 @@
 # python modules for face unlock
 #
 # 15/2/2023
-# we're assuming mema user now with root privileges via visudo?
-# this may need some adjustment too
+# we're now assuming mema user now with root privileges via visudo?
+# this may need some adjustment too, first user on pi is root
 # 
 # FIXME timesync doesn't work hence ntpspec/clock pi problems 'anyway'
 
@@ -47,7 +47,7 @@ apt install sqlite3
 apt install ntpsec
 apt install cmake
 
-# face sign in only, are these really necessary?
+#FIXME: face sign in only, are these really necessary?
 apt install libx11-dev
 apt install libgtk-3-dev
 
@@ -84,11 +84,11 @@ old_stty_cfg=$(stty -g)
 stty raw -echo ; answer=$(head -c 1) ; stty $old_stty_cfg # Careful playing with stty
 if [ "$answer" != "${answer#[Yy]}" ];then
     cp etc/mema_pi.ini etc/mema.ini
-    cp associations /home/pi/.config
+    cp associations /home/mema/.config
     echo 'mema_pi.ini copied to mema.ini'
 else
     cp etc/mema_laptop.ini etc/mema.ini
-    cp associations /home/hbarnard/.config
+    cp associations /home/mema/.config
     echo 'assuming laptop, mema_laptop.ini copied to mema.ini'
 fi
 
@@ -96,15 +96,18 @@ echo  '*------------------------------------------------------------------------
 echo 'trying to start containers mema_rhasspy, mema_nodered, mema_mimic3'
 
 #FIXME: pi should use mema user now?
-#usermod -aG docker pi
+usermod -aG docker mema
 docker run -d --network host --name mema_rhasspy --restart unless-stopped -v "$HOME/.config/rhasspy/profiles:/profiles" -v "/etc/localtime:/etc/localtime:ro" --device /dev/snd:/dev/snd rhasspy/rhasspy --user-profiles /profiles --profile en
 docker run --network host -d --restart unless-stopped --name mema_mimic3 -v "${HOME}/.local/share/mycroft/mimic3:/home/mimic3/.local/share/mycroft/mimic3" 'mycroftai/mimic3'
 docker run -d --network host -v node_red_data:/data --restart unless-stopped --name mema_nodered nodered/node-red
 
+#FIXME: Is this correct docker stuff runs as root?
 echo 'copying rough rhasspy profile to /root/.config/rhasspy/profiles/en'
-cp rhasspy/profiles/en/profile.json /home/mema/.config/rhasspy/profiles/en
+cp rhasspy/profiles/en/profile.json /root/.config/rhasspy/profiles/en
 echo 'copying sentences.ini to /root/.config/rhasspy/profiles/en'
-cp rhasspy/profiles/en/sentences.ini /home/mema/.config/rhasspy/profiles/en
+cp rhasspy/profiles/en/sentences.ini /root/.config/rhasspy/profiles/en
+
+echo 'please reboot rhasspy and do manual configuration after this!'
 
 #FIXME: The only thing in this should be the replicate API token
 cp env /home/mema/.env
