@@ -8,9 +8,6 @@ import webbrowser as wb
 # for system health, but pycurl should be used elsewhere
 # get rid of one of these, pycurl_request is probably problematic
 
-#FIXME: this is problematic: import pycurl_requests as req
-
-
 # get rid of one of these too, keep subprocess if possible
 import subprocess
 
@@ -97,7 +94,7 @@ async def info(info : Request):
     raw_speech = req_info['input'] 
     intent     = req_info['intent']['intentName'] 
     
-    #FIXME: parse numbers and courtesy, tidy this up
+    #FIXME: parse numbers and courtesy, tidy this up and extend for privacy declarations
     number = None
     polite = None
     match = re.search(r'\b\d+\b', raw_speech)
@@ -139,7 +136,7 @@ async def info(info : Request):
        # moved to face_unlock.py face unlock sign in as a registered user 
        # 'Unlock'         : run_face_unlock,
        # sign out, actuall sign in signs out anyone else 
-        'Lock'           : run_sign_out    
+       # 'Lock'           : run_sign_out    
 
     }
     
@@ -228,7 +225,7 @@ def run_video_command(number,please,config):
 
 
 
-#FIXME: ad-hoc remedy for non working VLC video on laptop
+#FIXME: ad-hoc remedy for non working VLC video on laptop, not needed now, kept as example only
 # bodge kill cvlc video process
 
 def run_kill_video_command(number,please,config):
@@ -239,7 +236,7 @@ def run_kill_video_command(number,please,config):
     return
 
 
-# FIXME: untested! shares code with transcribe and needs external AI, at present
+# FIXME: works but untested! shares code with transcribe and needs external AI, at present, convert to whisper.cpp
 # FIXME: label anything in database, extend this
    
 def run_label_video_command(number,please,config):
@@ -267,14 +264,14 @@ def run_label_video_command(number,please,config):
 
 
 #FIXME: to be done, associate n with m?
-    
+#FIXME: this is probably part/a start of the mosaic logic?    
 def run_associate_command(number,please,config):
     s2_out = subprocess.check_output([sys.executable, "/home/pi/projects/mema/associate.py"])
     return s2_out    
  
 
-# produce a composite of thumbnails
-
+# produce a composite of picture thumbnails
+# FIXME: this may need to be a cron on lower powered systems and SBCs
 def run_mosaic_command(number,please,config):
     logging.debug('in mosiac')
     mu.curl_speak(config['en_prompts']['wait_a_moment'])
@@ -285,7 +282,7 @@ def run_mosaic_command(number,please,config):
 
 
 # skeletion get search page, see https://community.rhasspy.org/t/recognized-untrain-sentences-words/465/5
-# discussion of wildcards
+# discussion of wildcards also asr_listen.py
 
 def run_search_command(number,please,config): 
     return

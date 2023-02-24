@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Exec=/home/mema/mema/face_onboarding/face_generate.py
+Name=face onboarding
+Comment=face onboarding for mema
+Icon=/home/mema/mema/static/user.png

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+#FIXME: where is this run from? make a desktop entry provisionally
+
 import math
 from sklearn import neighbors
 import os
@@ -13,6 +15,8 @@ import numpy as np
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
+print("Please run this from the face onboarding subdirectory or the shortcut")
+
 def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', verbose=False):
    
     # The training data would be all the face encodings from all the known images and the labels are their names
@@ -21,18 +25,18 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
 
     # Training directory
 
-    train_dir = os.listdir('dataset/')
+    train_dir = os.listdir('../dataset/')
     print(train_dir)
 
     # Loop through each person in the training directory
     for person in train_dir:
-        pix = os.listdir("dataset/" + person)
+        pix = os.listdir("../dataset/" + person)
     
         # Loop through each training image for the current person
         for person_img in pix:
             # Get the face encodings for the face in each image file
             print("dataset/" + person + "/" + person_img)
-            face = face_recognition.load_image_file("dataset/" + person + "/" + person_img)
+            face = face_recognition.load_image_file("../dataset/" + person + "/" + person_img)
             print(face.shape)
             # Assume the whole image is the location of the face
             #height, width, _ = face.shape
@@ -62,14 +66,11 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
     if model_save_path is not None:
         with open(model_save_path, 'wb') as f:
             pickle.dump(knn_clf, f)
-
     return knn_clf
-
-
 
 if __name__ == "__main__":
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
     print("Training KNN classifier...")
-    classifier = train("dataset", model_save_path="trained_knn_model.clf", n_neighbors=2)
+    classifier = train("../dataset", model_save_path="../face_data/trained_knn_model.clf", n_neighbors=2)
     print("Training complete!")    

@@ -34,6 +34,8 @@ Process will start in five seconds.
 
 time.sleep(5)
 
+print("Please run this from the face onboarding subdirectory or the shortcut")
+
 print("Enter first name last name:")
 name = input()
 

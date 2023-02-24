@@ -33,6 +33,8 @@ mkdir -p static/media/vid
 mkdir -p static/media/pic
 mkdir -p var/log/mema
 mkdir -p face_onboarding/dataset
+# keeps the k-means trained network
+mkdir -p face_data
 
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing packages'
@@ -46,12 +48,13 @@ apt install mosquitto mosquitto-dev
 apt install sqlite3 
 apt install ntpsec
 apt install cmake
+apt install imagemagick
 
 #FIXME: face sign in only, are these really necessary?
 apt install libx11-dev
 apt install libgtk-3-dev
 
-# may or may not need ffmpeg for sample conversion
+# better to have this, especially with migration to ubuntu
 apt install ffmpeg
 #FIXME: no portaudio package?
 apt install portaudio19-dev 
@@ -69,13 +72,13 @@ echo  '*------------------------------------------------------------------------
 echo 'installing mema3'
 echo 'install python3 packages, make take a while'
 echo  '*-------------------------------------------------------------------------------*'
-sudo -H pip install -r  requirements/requirements.txt
+sudo -H pip install -r  ../requirements/requirements.txt
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing intent server service'
-cp etc/systemd/intent_server.service /etc/systemd/system/
+cp ../etc/systemd/intent_server.service /etc/systemd/system/
 systemctl enable intent_server
 echo 'installing face unlock server service'
-cp etc/systemd/unlock_server.service /etc/systemd/system/
+cp ../etc/systemd/unlock_server.service /etc/systemd/system/
 systemctl enable unlock_server
 
 #FIXME: need to copy based on system pi or laptop
@@ -83,12 +86,12 @@ printf 'Is this a pi (y/n)? '
 old_stty_cfg=$(stty -g)
 stty raw -echo ; answer=$(head -c 1) ; stty $old_stty_cfg # Careful playing with stty
 if [ "$answer" != "${answer#[Yy]}" ];then
-    cp etc/mema_pi.ini etc/mema.ini
-    cp associations /home/mema/.config
+    cp ../etc/mema_pi.ini ../etc/mema.ini
+    cp ../etc/associations /home/mema/.config
     echo 'mema_pi.ini copied to mema.ini'
 else
-    cp etc/mema_laptop.ini etc/mema.ini
-    cp associations /home/mema/.config
+    cp ../etc/mema_laptop.ini ../etc/mema.ini
+    cp ../etc/associations /home/mema/.config
     echo 'assuming laptop, mema_laptop.ini copied to mema.ini'
 fi
 
@@ -110,7 +113,11 @@ cp rhasspy/profiles/en/sentences.ini /root/.config/rhasspy/profiles/en
 echo 'please reboot rhasspy and do manual configuration after this!'
 
 #FIXME: The only thing in this should be the replicate API token
-cp env /home/mema/.env
+cp ../env /home/mema/.env
+
+echo 'copying the shortcuts for face onboarding to the desktop'
+cp ../etc/face_onboarding.desktop /home/mema/Desktop
+cp ../etc/face_train.desktop /home/mema/Desktop
 
 echo  '*-------------------------------------------------------------------------------*'
 echo 'trying to start systemd servers'
