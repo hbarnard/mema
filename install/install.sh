@@ -86,14 +86,17 @@ if [ "$answer" != "${answer#[Yy]}" ];then
     cp /home/mema/mema/etc/mema_pi.ini ../etc/mema.ini
     cp /home/mema/mema/etc/associations /home/mema/.config
     echo 'mema_pi.ini copied to mema.ini'
-    echo 'make 2g swapfile to install dblib'
-    swapoff /swapfile
-    fallocate -l 2G /swapfile
-    mkswap /swapfile
-    swapon /swapfile    
+    echo 'install precompiled dblib'
+    wget https://github.com/prepkg/dlib-raspberrypi/releases/latest/download/dlib_64.deb
+    sudo dpkg -i ./dlib_64.deb
+    #swapoff /swapfile
+    #fallocate -l 2G /swapfile
+    #mkswap /swapfile
+    #swapon /swapfile    
 else
     cp /home/mema/mema/etc/mema_laptop.ini ../etc/mema.ini
     cp /home/mema/mema/etc/associations /home/mema/.config
+    sudo -H pip install dlib
     echo 'assuming laptop, mema_laptop.ini copied to mema.ini'
 fi
 
@@ -128,6 +131,8 @@ cp /home/mema/mema/env /home/mema/.env
 echo 'copying the shortcuts for face onboarding to the desktop'
 cp /home/mema/mema/etc/face_onboarding.desktop /home/mema/Desktop
 cp /home/mema/mema/etc/face_train.desktop /home/mema/Desktop
+chmod a+x /home/mema/Desktop/*.desktop
+
 
 echo  '*-------------------------------------------------------------------------------*'
 echo 'trying to start systemd servers'

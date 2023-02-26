@@ -16,7 +16,8 @@ uvicorn[standard]
 paho-mqtt
 imutils
 face_recognition
-dlib
+# dlib is installed separately for laptop and precompiled for pi
+#dlib
 #pickle
 # apparently unpickling sklearn?
 scikit-learn
