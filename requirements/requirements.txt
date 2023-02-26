@@ -8,7 +8,7 @@ h5py
 replicate
 #sqlite3
 #time
-webbrowser
+#webbrowser
 websockets
 wordcloud
 gunicorn
@@ -17,7 +17,7 @@ paho-mqtt
 imutils
 face_recognition
 dlib
-pickle
+#pickle
 # apparently unpickling sklearn?
 scikit-learn
 # package?
