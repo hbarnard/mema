@@ -7,7 +7,7 @@ h5py
 # only need replicate if using replicate.ai
 replicate
 #sqlite3
-time
+#time
 webbrowser
 websockets
 wordcloud

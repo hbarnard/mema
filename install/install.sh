@@ -26,59 +26,56 @@ echo 'making media directories'
 echo  '*-------------------------------------------------------------------------------*'
 
 # -p just in case
-mkdir -p static/media/mos
-mkdir -p static/media/tmp
-mkdir -p static/media/rec
-mkdir -p static/media/vid
-mkdir -p static/media/pic
-mkdir -p var/log/mema
-mkdir -p face_onboarding/dataset
+mkdir -p /home/mema/mema/static/media/mos
+mkdir -p /home/mema/mema/static/media/tmp
+mkdir -p /home/mema/mema/static/media/rec
+mkdir -p /home/mema/mema/static/media/vid
+mkdir -p /home/mema/mema/static/media/pic
+mkdir -p /home/mema/mema/var/log/mema
+mkdir -p /home/mema/mema/face_onboarding/dataset
 # keeps the k-means trained network
 mkdir -p face_data
 
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing packages'
 echo  '*-------------------------------------------------------------------------------*'
-apt install python3-pip
-apt install python3-numpy
-apt install python3-pycurl
-apt install python3-pyaudio 
-apt install python3-matplotlib python3-tk
-apt install mosquitto mosquitto-dev
-apt install sqlite3 
-apt install ntpsec
-apt install cmake
-apt install imagemagick
+apt install -y python3-pip
+apt install -y python3-numpy
+apt install -y python3-pycurl
+apt install -y python3-pyaudio 
+apt install -y python3-matplotlib python3-tk
+apt install -y mosquitto mosquitto-dev
+apt install -y sqlite3 
+apt install -y ntpsec
+apt install -y cmake
+apt install -y imagemagick
 
 #FIXME: face sign in only, are these really necessary?
-apt install libx11-dev
-apt install libgtk-3-dev
+apt install -y libx11-dev
+apt install -y libgtk-3-dev
 
 # better to have this, especially with migration to ubuntu
-apt install ffmpeg
+apt install -y ffmpeg
 #FIXME: no portaudio package?
-apt install portaudio19-dev 
+apt install -y portaudio19-dev 
 #FIXME: fswebcam is only used on the laptop, libcamera on the pi
-apt install fswebcam 
-apt install curl
+apt install -y fswebcam 
+apt install -y curl
 #FIXME: not part of the main software, but v. useful when testing
-apt install sqlitebrowser
+apt install -y sqlitebrowser
 
-apt install chromium-browser
+apt install -y chromium-browser
 # FIXME: is this guile2.0 or 3.0 either will 'work'
-apt install guile3.0
-sudo apt install docker.io
+apt install -y guile3.0
+apt install -y docker.io
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing mema3'
-echo 'install python3 packages, make take a while'
-echo  '*-------------------------------------------------------------------------------*'
-sudo -H pip install -r  ../requirements/requirements.txt
-echo  '*-------------------------------------------------------------------------------*'
+echo '*-------------------------------------------------------------------------------*'
 echo 'installing intent server service'
-cp ../etc/systemd/intent_server.service /etc/systemd/system/
+cp /home/mema/mema/etc/systemd/intent_server.service /etc/systemd/system/
 systemctl enable intent_server
 echo 'installing face unlock server service'
-cp ../etc/systemd/unlock_server.service /etc/systemd/system/
+cp /home/mema/mema/etc/systemd/unlock_server.service /etc/systemd/system/
 systemctl enable unlock_server
 
 #FIXME: need to copy based on system pi or laptop
@@ -86,15 +83,24 @@ printf 'Is this a pi (y/n)? '
 old_stty_cfg=$(stty -g)
 stty raw -echo ; answer=$(head -c 1) ; stty $old_stty_cfg # Careful playing with stty
 if [ "$answer" != "${answer#[Yy]}" ];then
-    cp ../etc/mema_pi.ini ../etc/mema.ini
-    cp ../etc/associations /home/mema/.config
+    cp /home/mema/mema/etc/mema_pi.ini ../etc/mema.ini
+    cp /home/mema/mema/etc/associations /home/mema/.config
     echo 'mema_pi.ini copied to mema.ini'
+    echo 'make 2g swapfile to install dblib'
+    swapoff /swapfile
+    fallocate -l 2G /swapfile
+    mkswap /swapfile
+    swapon /swapfile    
 else
-    cp ../etc/mema_laptop.ini ../etc/mema.ini
-    cp ../etc/associations /home/mema/.config
+    cp /home/mema/mema/etc/mema_laptop.ini ../etc/mema.ini
+    cp /home/mema/mema/etc/associations /home/mema/.config
     echo 'assuming laptop, mema_laptop.ini copied to mema.ini'
 fi
 
+echo 'install python3 packages, make take a while'
+echo  '*-------------------------------------------------------------------------------*'
+sudo -H pip install -r  /home/mema/mema/requirements/requirements.txt
+echo 
 echo  '*-------------------------------------------------------------------------------*'
 echo 'trying to start containers mema_rhasspy, mema_nodered, mema_mimic3'
 
@@ -102,22 +108,26 @@ echo 'trying to start containers mema_rhasspy, mema_nodered, mema_mimic3'
 usermod -aG docker mema
 docker run -d --network host --name mema_rhasspy --restart unless-stopped -v "$HOME/.config/rhasspy/profiles:/profiles" -v "/etc/localtime:/etc/localtime:ro" --device /dev/snd:/dev/snd rhasspy/rhasspy --user-profiles /profiles --profile en
 docker run --network host -d --restart unless-stopped --name mema_mimic3 -v "${HOME}/.local/share/mycroft/mimic3:/home/mimic3/.local/share/mycroft/mimic3" 'mycroftai/mimic3'
-docker run -d --network host -v node_red_data:/data --restart unless-stopped --name mema_nodered nodered/node-red
+doc
+
 
 #FIXME: Is this correct docker stuff runs as root?
-echo 'copying rough rhasspy profile to /root/.config/rhasspy/profiles/en'
-cp rhasspy/profiles/en/profile.json /root/.config/rhasspy/profiles/en
+#FIXME: Don't do this, it makes rhasspy restart constantly, final config must be done by hand
+#echo 'copying rough rhasspy profile to /root/.config/rhasspy/profiles/en'
+cp /home/mema/mema/rhasspy/profiles/en/profile.json /root/.config/rhasspy/profiles/en
+
+#FIXME: Leave this 'for the moment'
 echo 'copying sentences.ini to /root/.config/rhasspy/profiles/en'
-cp rhasspy/profiles/en/sentences.ini /root/.config/rhasspy/profiles/en
+cp /home/mema/mema/rhasspy/profiles/en/sentences.ini /root/.config/rhasspy/profiles/en
 
 echo 'please reboot rhasspy and do manual configuration after this!'
 
 #FIXME: The only thing in this should be the replicate API token
-cp ../env /home/mema/.env
+cp /home/mema/mema/env /home/mema/.env
 
 echo 'copying the shortcuts for face onboarding to the desktop'
-cp ../etc/face_onboarding.desktop /home/mema/Desktop
-cp ../etc/face_train.desktop /home/mema/Desktop
+cp /home/mema/mema/etc/face_onboarding.desktop /home/mema/Desktop
+cp /home/mema/mema/etc/face_train.desktop /home/mema/Desktop
 
 echo  '*-------------------------------------------------------------------------------*'
 echo 'trying to start systemd servers'
