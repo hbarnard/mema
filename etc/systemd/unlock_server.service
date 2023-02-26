@@ -3,7 +3,7 @@ Description=Face Unlock Server for Mema: Login via Face
 After=network.target
 
 [Service]
-User=pi
+User=mema
 Group=users
 PermissionsStartOnly = true
 Environment=QT_DEBUG_PLUGINS=1
@@ -11,7 +11,7 @@ Environment=DISPLAY=:0
 PIDFile=/var/mema/unlock_server.pid
 WorkingDirectory=/usr/share/pyshared/
 
-ExecStart = /home/pi/mema/face_unlock.py
+ExecStart = /home/mema/mema/face_unlock.py
 ExecReload = /bin/kill -s HUP $MAINPID
 ExecStop = /bin/kill -s TERM $MAINPID
 
