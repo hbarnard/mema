@@ -66,7 +66,7 @@ apt install -y sqlitebrowser
 
 apt install -y chromium-browser
 # FIXME: is this guile2.0 or 3.0 either will 'work'
-apt install -y guile3.0
+apt install -y guile-3.0
 apt install -y docker.io
 echo  '*-------------------------------------------------------------------------------*'
 echo 'installing mema3'
