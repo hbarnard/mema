@@ -12,7 +12,7 @@ WorkingDirectory=/usr/share/pyshared/
 Environment=REPLICATE_API_TOKEN=
 #ExecStartPre = /bin/mkdir /run/mema
 
-ExecStart=/bin/sh -c "cd /home/mema/mema && /usr/local/bin/gunicorn -k uvicorn.workers.UvicornWorker intent_server:app -b 0.0.0.0:8000 --pid /var/mema/intent_server.pid"
+ExecStart=/bin/sh -c "cd /home/mema/mema && /usr/local/bin/gunicorn -k uvicorn.workers.UvicornWorker intent_server:app -b 0.0.0.0:8000 --pid /tmp/intent_server.pid"
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 #ExecStopPost=/bin/rmdir /run/mema/
