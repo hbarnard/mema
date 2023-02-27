@@ -13,9 +13,10 @@ websockets
 wordcloud
 gunicorn
 uvicorn[standard]
+jinja2
 paho-mqtt
 imutils
-face_recognition
+#face_recognition
 # dlib is installed separately for laptop and precompiled for pi
 #dlib
 #pickle
