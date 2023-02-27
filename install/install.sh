@@ -117,7 +117,7 @@ docker run -d --network host -v node_red_data:/data --restart unless-stopped --n
 #FIXME: Is this correct docker stuff runs as root?
 #FIXME: Don't do this, it makes rhasspy restart constantly, final config must be done by hand
 #echo 'copying rough rhasspy profile to /root/.config/rhasspy/profiles/en'
-cp /home/mema/mema/rhasspy/profiles/en/profile.json /root/.config/rhasspy/profiles/en
+#cp /home/mema/mema/rhasspy/profiles/en/profile.json /root/.config/rhasspy/profiles/en
 
 #FIXME: Leave this 'for the moment'
 echo 'copying sentences.ini to /root/.config/rhasspy/profiles/en'
@@ -132,7 +132,7 @@ echo 'copying the shortcuts for face onboarding to the desktop'
 cp /home/mema/mema/etc/face_onboarding.desktop /home/mema/Desktop
 cp /home/mema/mema/etc/face_train.desktop /home/mema/Desktop
 chmod a+x /home/mema/Desktop/*.desktop
-
+chmod a+r /home/mema/Desktop/*.desktop
 
 echo  '*-------------------------------------------------------------------------------*'
 echo 'trying to start systemd servers'
