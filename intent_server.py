@@ -35,6 +35,8 @@ import logging
 
 from configobj import ConfigObj
 
+sqlite3.enable_callback_tracebacks(True)
+
 app = FastAPI(debug=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/media", StaticFiles(directory="static/media", html=True), name="media")   
@@ -94,15 +96,23 @@ async def info(info : Request):
     raw_speech = req_info['input'] 
     intent     = req_info['intent']['intentName'] 
     
-    #FIXME: parse numbers and courtesy, tidy this up and extend for privacy declarations
+    #FIXME: parse numbers, courtesy and unlock for delete, tidy this up and extend for privacy declarations
     number = None
     polite = None
+    sesame = None  
+    
     match = re.search(r'\b\d+\b', raw_speech)
     if match:
         number = match.group(0)     
+    
     match     = re.search(r'\bplease\b', raw_speech)  
     if match:
         polite = match.group(0)  
+        
+    match     = re.search(r'\bsesame\b', raw_speech)  
+    if match:
+        sesame = match.group(0)      
+        
     
     # confidence level too low or garbled intent
     if not len(intent) or (req_info['asrConfidence'] < float(config['main']['confidence'])) :
@@ -116,14 +126,19 @@ async def info(info : Request):
     #FIXME one or two, such as redirects can't be handled in the intent table, via switch in node-red?
     if intent == "GetStory" and (number[0] in number):
         url = config['main']['intent_server'] + "/memory/" + str(number[0]) + "/speak"
-        return RedirectResponse(url)    
+        return RedirectResponse(url) 
+        
+    if intent == "DeleteStory" and (number[0] in number) and (sesame[0] in sesame):
+        run_delete_command(number[0],polite,config)
+        url = config['main']['intent_server'] + "/memories.html/"
+        return RedirectResponse(url)     
+           
     
     # intents are the options see: https://stackoverflow.com/questions/17881409/whats-an-alternative-to-if-elif-statements-in-python
     intents = {
 
         'TakePhoto'      : run_photo_command,
       #  'GetTime'       : run_time_command,
-      #  'Associate'     : print("associate photo and story found"),
         'RecordStory'    : run_record_command,
         'RecordVideo'    : run_video_command,
         'KillVideo'      : run_kill_video_command,  
@@ -131,13 +146,8 @@ async def info(info : Request):
         'SlicePie'       : run_pie,
         'SearchPage'     : run_search_command,
         'LetsGo'         : run_front_page,            
-      # 'SearchMemories' : run_search_memories,
         'Mosaic'         : run_mosaic_command,
-       # moved to face_unlock.py face unlock sign in as a registered user 
-       # 'Unlock'         : run_face_unlock,
-       # sign out, actuall sign in signs out anyone else 
-       # 'Lock'           : run_sign_out    
-
+        'GoHome'         : go_home,
     }
     
     if intent in intents:
@@ -153,7 +163,30 @@ async def info(info : Request):
     
     logging.debug('<---is when this event returns.')
 
-# take a photo and store it
+
+# delete a record
+
+def run_delete_command(number,polite,config):
+    logging.debug('in delete record ' + number)    
+    mu.curl_speak(config['en_prompts']['delete'])
+    try:
+        cur = con.cursor()
+        cur.execute("DELETE from memories where memory_id = ?", number)
+        con.commit() 
+        mu.curl_speak(config['en_prompts']['done'])
+    except:
+        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+    #logging.debug('deleted record ' + number)    
+    return
+
+# go back to top
+
+def go_home(number,polite,config, response_class=HTMLResponse):
+    logging.debug('in go home')    
+    mu.open_url('memories.html',config)
+    return
+
+# take a photo
             
 def run_photo_command(number,polite,config):
         
@@ -205,7 +238,7 @@ def run_record_command(number,please,config):
   
 def run_video_command(number,please,config):
     
-    print("record video found") if config['main']['debug'] else None
+    #print("record video found") if config['main']['debug'] else None
     
     result = subprocess.check_output(config['main']['video_program'], stderr=subprocess.STDOUT)
     result_string = result.decode('utf-8')
@@ -230,7 +263,7 @@ def run_video_command(number,please,config):
 
 def run_kill_video_command(number,please,config):
     
-    print("kill video record found") if config['main']['debug'] else None
+    #print("kill video record found") if config['main']['debug'] else None
     com_array = config['main']['kill_video_command'].split()
     subprocess.call(com_array,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
     return
